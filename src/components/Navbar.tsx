@@ -51,8 +51,8 @@ export const Navbar = ({ user, onLogout, onNavigate }: { user: User | null, onLo
                     </div>
                 ) : (
                     <div className="flex items-center gap-2">
-                        <button onClick={() => setView ? onNavigate('login') : null} className="text-sm font-bold text-stone-600 px-4 py-2 hover:bg-stone-50 rounded-xl transition-colors">LOGIN</button>
-                        <button onClick={() => setView ? onNavigate('register') : null} className="text-sm font-bold bg-emerald-600 text-white px-4 py-2 rounded-xl hover:bg-emerald-700 transition-all shadow-md shadow-emerald-100">JOIN</button>
+                        <button onClick={() => onNavigate('login')} className="text-sm font-bold text-stone-600 px-4 py-2 hover:bg-stone-50 rounded-xl transition-colors">LOGIN</button>
+                        <button onClick={() => onNavigate('register')} className="text-sm font-bold bg-emerald-600 text-white px-4 py-2 rounded-xl hover:bg-emerald-700 transition-all shadow-md shadow-emerald-100">JOIN</button>
                     </div>
                 )}
             </div>
