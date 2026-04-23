@@ -41,6 +41,7 @@ interface Artisan {
   is_online: number;
   distance_km: string;
   smart_score: number;
+  profile_image?: string;
 }
 
 interface User {
