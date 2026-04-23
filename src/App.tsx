@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { io, Socket } from 'socket.io-client';
 import {
   Search, MapPin, Star, ShieldCheck, Hammer,
@@ -383,6 +384,8 @@ export default function App() {
 
   const [bookingArtisan, setBookingArtisan] = useState<Artisan | null>(null);
   const [bookingDesc, setBookingDesc] = useState('');
+  const [bookingDate, setBookingDate] = useState('');
+  const [bookingTime, setBookingTime] = useState('');
 
   // ─── Handle Rating Submission ──────────────────────────────────────
   const handleRateRequest = async () => {
@@ -513,9 +516,30 @@ export default function App() {
                 />
               </div>
 
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-stone-400 uppercase">التاريخ</label>
+                  <input
+                    type="date"
+                    value={bookingDate}
+                    onChange={(e) => setBookingDate(e.target.value)}
+                    className="w-full p-4 bg-stone-50 border border-stone-200 rounded-2xl focus:border-emerald-500 outline-none text-sm"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-stone-400 uppercase">الوقت</label>
+                  <input
+                    type="time"
+                    value={bookingTime}
+                    onChange={(e) => setBookingTime(e.target.value)}
+                    className="w-full p-4 bg-stone-50 border border-stone-200 rounded-2xl focus:border-emerald-500 outline-none text-sm"
+                  />
+                </div>
+              </div>
+
               <div className="bg-amber-50 p-4 rounded-xl border border-amber-100 flex items-start gap-3">
                 <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-                <p className="text-[10px] text-amber-800 font-medium">بتأكيد الطلب، سيتم إرساله إلى الحرفي. سيتواصل معك لاحقاً فور قبول الطلب.</p>
+                <p className="text-[10px] text-amber-800 font-medium">بتأكيد الطلب، سيتم إرساله إلى الحرفي للتحقق من الموعد المختار. سيتواصل معك فور قبوله.</p>
               </div>
 
               <button
@@ -533,7 +557,8 @@ export default function App() {
                         categoryId: bookingArtisan.category_id,
                         description: bookingDesc,
                         lat: location?.lat || 36.8,
-                        lng: location?.lng || 10.1
+                        lng: location?.lng || 10.1,
+                        scheduled_at: bookingDate && bookingTime ? `${bookingDate}T${bookingTime}` : null
                       })
                     });
                     if (res.ok) {
@@ -697,6 +722,12 @@ export default function App() {
               animate={{ opacity: 1, y: 0 }}
               className="space-y-8"
             >
+              <Helmet>
+                <title>{selectedArtisan.full_name} - {selectedArtisan.category_name} على تـوّا</title>
+                <meta property="og:title" content={`${selectedArtisan.full_name} - ${selectedArtisan.category_name}`} />
+                <meta property="og:description" content={selectedArtisan.bio || "اكتشف أفضل الحرفيين الموثوقين في تونس."} />
+                <meta property="og:image" content={selectedArtisan.profile_image || "https://tawa.tn/default-artisan.jpg"} />
+              </Helmet>
               <button onClick={() => setView('search-results')} className="text-sm font-bold text-stone-400 hover:text-stone-600 mb-2 flex items-center gap-1 uppercase tracking-widest text-right" dir="rtl">
                 ← العودة إلى النتائج
               </button>
@@ -709,7 +740,16 @@ export default function App() {
                   <div>
                     <div className="flex items-center gap-2 mb-1 justify-start">
                       <h2 className="text-4xl font-black tracking-tight">{selectedArtisan.full_name}</h2>
-                      {selectedArtisan.is_verified === 1 && <ShieldCheck className="text-emerald-600 w-6 h-6" />}
+                      {selectedArtisan.is_verified === 1 && (
+                        <div className="flex gap-2">
+                          <ShieldCheck className="text-emerald-600 w-6 h-6" />
+                          {selectedArtisan.smart_score > 0.8 && (
+                            <span className="bg-amber-100 text-amber-700 text-[10px] font-black px-2 py-0.5 rounded-md flex items-center gap-1">
+                              <Star className="w-3 h-3 fill-current" /> متميز
+                            </span>
+                          )}
+                        </div>
+                      )}
                     </div>
                     <p className="text-emerald-600 font-bold uppercase tracking-widest text-sm text-right">{selectedArtisan.category_name}</p>
                   </div>

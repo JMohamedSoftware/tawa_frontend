@@ -40,11 +40,18 @@ export const ArtisanCard = ({ artisan, onClick }: { artisan: Artisan, onClick: (
                     <p className="text-xs text-stone-500 font-medium uppercase tracking-tighter">{artisan.category_name}</p>
                 </div>
             </div>
-            {artisan.is_verified === 1 && (
-                <div className="bg-emerald-100 text-emerald-700 p-1 rounded-full" title="حرفي موثق">
-                    <ShieldCheck className="w-4 h-4" />
-                </div>
-            )}
+            <div className="flex gap-2">
+                {artisan.smart_score > 0.8 && (
+                    <div className="bg-amber-100 text-amber-700 px-2 py-0.5 rounded text-[10px] font-black flex items-center gap-1">
+                        <Star className="w-3 h-3 fill-current" /> متميز
+                    </div>
+                )}
+                {artisan.is_verified === 1 && (
+                    <div className="bg-emerald-100 text-emerald-700 p-1 rounded-full" title="حرفي موثق">
+                        <ShieldCheck className="w-4 h-4" />
+                    </div>
+                )}
+            </div>
         </div>
 
         <div className="flex items-center gap-4 mb-4 text-sm text-right">
