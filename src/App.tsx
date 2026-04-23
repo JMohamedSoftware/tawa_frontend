@@ -397,7 +397,7 @@ export default function App() {
       setRatingRequest(null);
       setRatingValue(5);
       setRatingReview('');
-      addNotification('⭐ Rating submitted! Thank you!');
+      addNotification('⭐ تم إرسال التقييم! شكراً لك!');
     } catch (err) { console.error(err); }
   };
 
@@ -444,7 +444,7 @@ export default function App() {
         localStorage.setItem('artisan_user', JSON.stringify(data.user));
         setUser(data.user);
       }
-      setProfileMsg('✅ Profile updated successfully!');
+      setProfileMsg('✅ تم تحديث الملف الشخصي بنجاح!');
     } catch (err: any) {
       setProfileMsg(`❌ ${err.message}`);
     }
@@ -626,20 +626,19 @@ export default function App() {
                   animate={{ y: 0, opacity: 1 }}
                   className="text-5xl md:text-7xl font-black tracking-tighter text-stone-900"
                 >
-                  FIND THE BEST <br />
-                  <span className="text-emerald-600 italic">VERIFIED</span> ARTISANS
+                  ابحث عن أفضل <br />
+                  <span className="text-emerald-600 italic">الحرفيين</span> الموثقين
                 </motion.h1>
                 <p className="text-lg text-stone-500 max-w-2xl mx-auto font-medium">
-                  The first smart marketplace for Tunisian craftsmen. Verified profiles,
-                  transparent ratings, and instant booking.
+                  أول سوق ذكي للحرفيين التونسيين. ملفات شخصية موثقة، تقييمات شفافة وحجز فوري.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
                   <div className="relative w-full max-w-md">
                     <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400 w-5 h-5" />
                     <input
                       type="text"
-                      placeholder="Your location (e.g. Tunis, Sousse...)"
-                      className="w-full pl-12 pr-4 py-4 bg-white border-2 border-stone-100 rounded-2xl focus:border-emerald-500 outline-none transition-all shadow-sm"
+                      placeholder="موقعك (مثلاً: تونس، سوسة...)"
+                      className="w-full pl-12 pr-4 py-4 bg-white border-2 border-stone-100 rounded-2xl focus:border-emerald-500 outline-none transition-all shadow-sm text-right"
                       onFocus={getUserLocation}
                     />
                   </div>
@@ -648,15 +647,15 @@ export default function App() {
                     className="w-full sm:w-auto bg-stone-900 text-white px-8 py-4 rounded-2xl font-bold hover:bg-stone-800 transition-all flex items-center justify-center gap-2 shadow-lg"
                   >
                     <Search className="w-5 h-5" />
-                    SEARCH NEARBY
+                    ابحث في منطقتي
                   </button>
                 </div>
               </section>
 
               <section className="space-y-6">
                 <div className="flex justify-between items-end">
-                  <h2 className="text-2xl font-bold tracking-tight">Popular Categories</h2>
-                  <button className="text-sm font-bold text-emerald-600 uppercase tracking-widest">View All</button>
+                  <h2 className="text-2xl font-bold tracking-tight">الفئات الشائعة</h2>
+                  <button className="text-sm font-bold text-emerald-600 uppercase tracking-widest">عرض الكل</button>
                 </div>
                 <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar">
                   {categories.map(cat => (
@@ -675,11 +674,11 @@ export default function App() {
 
               <section className="grid md:grid-cols-3 gap-8 py-12">
                 {[
-                  { icon: ShieldCheck, title: "Verified Profiles", desc: "Every artisan goes through a strict ID and skill verification process." },
-                  { icon: Star, title: "Smart Ranking", desc: "Our algorithm sorts by distance, rating, and reliability to find your perfect match." },
-                  { icon: Clock, title: "Instant Booking", desc: "Create a request and get responses from nearby artisans in minutes." }
+                  { icon: ShieldCheck, title: "ملفات موثقة", desc: "يخضع كل حرفي لعملية تحقق صارمة للهوية والمهارات لضمان الجودة." },
+                  { icon: Star, title: "ترتيب ذكي", desc: "نظامنا يرتب النتائج حسب المسافة والتقييم والموثوقية لتجد الأنسب لك." },
+                  { icon: Clock, title: "حجز فوري", desc: "أنشئ طلباً واحصل على ردود من الحرفيين المتاحين في محيطك خلال دقائق." }
                 ].map((feature, i) => (
-                  <div key={i} className="bg-white p-8 rounded-3xl border border-stone-100 shadow-sm hover:shadow-md transition-shadow">
+                  <div key={i} className="bg-white p-8 rounded-3xl border border-stone-100 shadow-sm hover:shadow-md transition-shadow text-right" dir="rtl">
                     <div className="bg-emerald-50 w-12 h-12 rounded-2xl flex items-center justify-center mb-6">
                       <feature.icon className="text-emerald-600 w-6 h-6" />
                     </div>
@@ -698,36 +697,36 @@ export default function App() {
               animate={{ opacity: 1, y: 0 }}
               className="space-y-8"
             >
-              <button onClick={() => setView('search-results')} className="text-sm font-bold text-stone-400 hover:text-stone-600 mb-2 flex items-center gap-1 uppercase tracking-widest">
-                ← Back to Results
+              <button onClick={() => setView('search-results')} className="text-sm font-bold text-stone-400 hover:text-stone-600 mb-2 flex items-center gap-1 uppercase tracking-widest text-right" dir="rtl">
+                ← العودة إلى النتائج
               </button>
 
-              <div className="bg-white rounded-3xl border border-stone-100 p-8 shadow-sm flex flex-col md:flex-row gap-8">
+              <div className="bg-white rounded-3xl border border-stone-100 p-8 shadow-sm flex flex-col md:flex-row gap-8 text-right" dir="rtl">
                 <div className="w-24 h-24 bg-stone-100 rounded-2xl flex items-center justify-center text-stone-300 text-4xl font-black">
                   {selectedArtisan.full_name.charAt(0)}
                 </div>
                 <div className="flex-1 space-y-4">
                   <div>
-                    <div className="flex items-center gap-2 mb-1">
+                    <div className="flex items-center gap-2 mb-1 justify-start">
                       <h2 className="text-4xl font-black tracking-tight">{selectedArtisan.full_name}</h2>
                       {selectedArtisan.is_verified === 1 && <ShieldCheck className="text-emerald-600 w-6 h-6" />}
                     </div>
-                    <p className="text-emerald-600 font-bold uppercase tracking-widest text-sm">{selectedArtisan.category_name}</p>
+                    <p className="text-emerald-600 font-bold uppercase tracking-widest text-sm text-right">{selectedArtisan.category_name}</p>
                   </div>
-                  <p className="text-stone-600 leading-relaxed text-lg italic">"{selectedArtisan.bio || 'Professional artisan ready to help with your needs.'}"</p>
+                  <p className="text-stone-600 leading-relaxed text-lg italic">"{selectedArtisan.bio || 'حرفي محترف جاهز لتلبية احتياجاتك بكل دقة.'}"</p>
 
-                  <div className="flex flex-wrap gap-6 pt-4">
+                  <div className="flex flex-wrap gap-6 pt-4 justify-start">
                     <div className="flex items-center gap-2">
                       <Star className="text-amber-500 fill-current w-5 h-5" />
-                      <span className="font-bold">{selectedArtisan.avg_rating.toFixed(1)} Rating</span>
+                      <span className="font-bold">{selectedArtisan.avg_rating.toFixed(1)} تقييم</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <CheckCircle2 className="text-stone-400 w-5 h-5" />
-                      <span className="font-bold text-stone-900">{selectedArtisan.completed_jobs} Jobs Completed</span>
+                      <span className="font-bold text-stone-900">{selectedArtisan.completed_jobs} عمل مكتمل</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <MapPin className="text-stone-400 w-5 h-5" />
-                      <span className="font-bold text-stone-900">{selectedArtisan.distance_km} km away</span>
+                      <span className="font-bold text-stone-900">على بعد {selectedArtisan.distance_km} كم</span>
                     </div>
                   </div>
                 </div>
@@ -736,7 +735,7 @@ export default function App() {
                     onClick={() => setBookingArtisan(selectedArtisan)}
                     className="w-full bg-stone-900 text-white py-4 rounded-2xl font-bold border-b-4 border-black hover:bg-stone-800 transition-all flex items-center justify-center gap-2"
                   >
-                    REQUEST SERVICE
+                    اطلب الخدمة الآن
                   </button>
                   <div className="px-4 py-3 bg-stone-50 rounded-xl border border-stone-200 flex items-center gap-3">
                     <div className={cn("w-2 h-2 rounded-full", selectedArtisan.is_online ? "bg-emerald-500 animate-pulse" : "bg-stone-300")} />
@@ -760,20 +759,20 @@ export default function App() {
               exit={{ opacity: 0, x: -20 }}
               className="space-y-8"
             >
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 text-right" dir="rtl">
                 <div>
-                  <button onClick={() => setView('home')} className="text-sm font-bold text-stone-400 hover:text-stone-600 mb-2 flex items-center gap-1 uppercase tracking-widest">
-                    ← Back to Home
+                  <button onClick={() => setView('home')} className="text-sm font-bold text-stone-400 hover:text-stone-600 mb-2 flex items-center gap-1 uppercase tracking-widest justify-end">
+                    ← العودة للرئيسية
                   </button>
                   <h2 className="text-3xl font-black tracking-tight">
-                    {artisans.length} Artisans Found
-                    {selectedCategory && <span className="text-emerald-600"> in {categories.find(c => c.slug === selectedCategory)?.name}</span>}
+                    تم العثور على {artisans.length} حرفياً
+                    {selectedCategory && <span className="text-emerald-600"> في {categories.find(c => c.slug === selectedCategory)?.name}</span>}
                   </h2>
                 </div>
                 <div className="flex gap-2 bg-white p-1 rounded-xl border border-stone-200">
-                  <button className="px-4 py-2 text-xs font-bold bg-stone-900 text-white rounded-lg">Smart Score</button>
-                  <button className="px-4 py-2 text-xs font-bold text-stone-500 hover:bg-stone-50 rounded-lg">Distance</button>
-                  <button className="px-4 py-2 text-xs font-bold text-stone-500 hover:bg-stone-50 rounded-lg">Rating</button>
+                  <button className="px-4 py-2 text-xs font-bold bg-stone-900 text-white rounded-lg">الترتيب الذكي</button>
+                  <button className="px-4 py-2 text-xs font-bold text-stone-500 hover:bg-stone-50 rounded-lg">المسافة</button>
+                  <button className="px-4 py-2 text-xs font-bold text-stone-500 hover:bg-stone-50 rounded-lg">التقييم</button>
                 </div>
               </div>
 
@@ -802,8 +801,8 @@ export default function App() {
               ) : (
                 <div className="text-center py-24 bg-white rounded-3xl border-2 border-dashed border-stone-200">
                   <AlertCircle className="w-12 h-12 text-stone-300 mx-auto mb-4" />
-                  <h3 className="text-xl font-bold text-stone-900">No artisans found in this area</h3>
-                  <p className="text-stone-500">Try expanding your search radius or checking another category.</p>
+                  <h3 className="text-xl font-bold text-stone-900">لم يتم العثور على أي حرفيين في منطقتك</h3>
+                  <p className="text-stone-500">حاول توسيع نطاق البحث أو اختيار فئة أخرى.</p>
                 </div>
               )}
             </motion.div>
@@ -1134,12 +1133,12 @@ export default function App() {
 
                 <div className="bg-white p-8 rounded-3xl border border-stone-100 shadow-sm space-y-6">
                   <div className="flex justify-between items-center">
-                    <h3 className="text-xl font-bold">Profile Settings</h3>
+                    <h3 className="text-xl font-bold">إعدادات الملف الشخصي</h3>
                     <button
                       onClick={async () => {
                         setLoading(true);
                         try {
-                          const bio = "Professional " + (artisanProfile?.category_name || "Artisan") + " with years of experience in high-quality craftsmanship. Dedicated to serving the Tunisian market with trust and reliability.";
+                          const bio = "حرفي محترف في فئة " + (artisanProfile?.category_name || "الحرف") + " مع سنوات من الخبرة في العمل عالي الجودة. ملتزم بخدمة السوق التونسية بكل ثقة ومصداقية.";
                           setArtisanProfile({ ...artisanProfile, bio });
                         } finally {
                           setLoading(false);
@@ -1147,38 +1146,38 @@ export default function App() {
                       }}
                       className="text-xs font-bold text-emerald-600 border border-emerald-200 px-3 py-1.5 rounded-lg hover:bg-emerald-50 transition-colors"
                     >
-                      ✨ Magic Bio
+                      ✨ سيرة ذاتية ذكية
                     </button>
                   </div>
-                  <div className="space-y-4">
+                  <div className="space-y-4 text-right" dir="rtl">
                     <div className="grid md:grid-cols-2 gap-4">
                       <div className="space-y-1">
-                        <label className="text-xs font-bold text-stone-400 uppercase">Service Category</label>
+                        <label className="text-xs font-bold text-stone-400 uppercase">فئة الخدمة</label>
                         <select
                           value={artisanProfile?.category_id || ''}
                           onChange={(e) => setArtisanProfile({ ...artisanProfile, category_id: e.target.value })}
-                          className="w-full p-3 bg-stone-50 border border-stone-200 rounded-xl focus:border-emerald-500 outline-none h-12 text-sm"
+                          className="w-full p-3 bg-stone-50 border border-stone-200 rounded-xl focus:border-emerald-500 outline-none h-12 text-sm text-right"
                         >
-                          <option value="">Select Category</option>
+                          <option value="">اختر الفئة</option>
                           {categories.map(c => (
                             <option key={c.id} value={c.id}>{c.name}</option>
                           ))}
                         </select>
                       </div>
                       <div className="space-y-1">
-                        <label className="text-xs font-bold text-stone-400 uppercase">Service Radius (km)</label>
+                        <label className="text-xs font-bold text-stone-400 uppercase">نطاق الخدمة (كم)</label>
                         <input
                           type="number"
                           value={artisanProfile?.service_radius_km || 20}
                           onChange={(e) => setArtisanProfile({ ...artisanProfile, service_radius_km: parseFloat(e.target.value) })}
-                          className="w-full p-3 bg-stone-50 border border-stone-200 rounded-xl focus:border-emerald-500 outline-none h-12 text-sm"
+                          className="w-full p-3 bg-stone-50 border border-stone-200 rounded-xl focus:border-emerald-500 outline-none h-12 text-sm text-right"
                         />
                       </div>
                     </div>
 
                     <div className="space-y-2">
                       <label className="text-xs font-bold text-stone-400 uppercase flex justify-between">
-                        Service Location (GPS)
+                        موقع الخدمة (GPS)
                         <button
                           onClick={() => {
                             if (navigator.geolocation) {
@@ -1189,42 +1188,42 @@ export default function App() {
                           }}
                           className="text-emerald-600 hover:text-emerald-700 normal-case"
                         >
-                          Detect My Location
+                          تحديد موقعي التلقائي
                         </button>
                       </label>
                       <div className="grid grid-cols-2 gap-4">
                         <input
-                          placeholder="Latitude"
+                          placeholder="خط العرض"
                           type="number"
                           value={artisanProfile?.lat || ''}
                           readOnly
-                          className="w-full p-3 bg-stone-100 border border-stone-200 rounded-xl text-stone-500 text-sm"
+                          className="w-full p-3 bg-stone-100 border border-stone-200 rounded-xl text-stone-500 text-sm text-center"
                         />
                         <input
-                          placeholder="Longitude"
+                          placeholder="خط الطول"
                           type="number"
                           value={artisanProfile?.lng || ''}
                           readOnly
-                          className="w-full p-3 bg-stone-100 border border-stone-200 rounded-xl text-stone-500 text-sm"
+                          className="w-full p-3 bg-stone-100 border border-stone-200 rounded-xl text-stone-500 text-sm text-center"
                         />
                       </div>
                     </div>
 
                     <div>
-                      <label className="text-xs font-bold text-stone-400 uppercase">Biography</label>
+                      <label className="text-xs font-bold text-stone-400 uppercase">السيرة الذاتية (Bio)</label>
                       <textarea
                         value={artisanProfile?.bio || ''}
                         onChange={(e) => setArtisanProfile({ ...artisanProfile, bio: e.target.value })}
-                        className="w-full mt-2 p-4 bg-stone-50 border border-stone-200 rounded-2xl focus:border-emerald-500 outline-none h-32 text-sm"
-                        placeholder="Tell clients about your experience and skills..."
+                        className="w-full mt-2 p-4 bg-stone-50 border border-stone-200 rounded-2xl focus:border-emerald-500 outline-none h-32 text-sm text-right"
+                        placeholder="أخبر الزبائن عن خبرتك ومهاراتك..."
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <label className="text-xs font-bold text-stone-400 uppercase">Verification Documents (CIN / Diploma)</label>
+                      <label className="text-xs font-bold text-stone-400 uppercase">وثائق التوثيق (بطاقة التعريف / دبلوم)</label>
                       <div className="flex gap-4">
                         <label className="flex-1 bg-stone-50 border-2 border-dashed border-stone-200 p-4 rounded-2xl text-center cursor-pointer hover:bg-stone-100 transition-colors">
-                          <span className="text-xs font-bold text-stone-500">Click to Upload Document</span>
+                          <span className="text-xs font-bold text-stone-500">انقر لتحميل الوثيقة</span>
                           <input type="file" className="hidden" onChange={(e) => handleUploadDocument(e, 'cin')} accept=".pdf,image/*" />
                         </label>
                       </div>
@@ -1240,11 +1239,11 @@ export default function App() {
                           },
                           body: JSON.stringify(artisanProfile)
                         });
-                        alert('Profile updated successfully!');
+                        alert('تم تحديث الملف الشخصي بنجاح!');
                       }}
                       className="w-full bg-stone-900 text-white py-4 rounded-2xl font-bold hover:bg-stone-800 transition-all border-b-4 border-black"
                     >
-                      Save Professional Profile
+                      حفظ الملف الشخصي المهني
                     </button>
                   </div>
                 </div>
@@ -1416,7 +1415,7 @@ export default function App() {
                         <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center font-black text-emerald-600 border border-stone-100 shadow-sm group-hover:bg-emerald-600 group-hover:text-white transition-colors">{a.full_name.charAt(0)}</div>
                         <div>
                           <p className="font-bold text-sm text-stone-900">{a.full_name}</p>
-                          <p className="text-[10px] text-stone-400 font-bold uppercase">{a.category_name} • {a.distance_km} km</p>
+                          <p className="text-[10px] text-stone-400 font-bold uppercase">{a.category_name} • {a.distance_km} كم</p>
                         </div>
                       </div>
                     )) : <p className="text-xs text-stone-400 font-bold italic">Search to find artisans nearby...</p>}
@@ -1466,17 +1465,17 @@ export default function App() {
               animate={{ opacity: 1, scale: 1 }}
               className="max-w-xl mx-auto space-y-8"
             >
-              <h2 className="text-3xl font-black tracking-tighter uppercase text-stone-900">Account Settings</h2>
+              <h2 className="text-3xl font-black tracking-tighter uppercase text-stone-900 text-right">إعدادات الحساب</h2>
               
-              <div className="bg-white p-8 rounded-3xl border border-stone-100 shadow-xl space-y-8">
-                <div className="flex items-center gap-6">
+              <div className="bg-white p-8 rounded-3xl border border-stone-100 shadow-xl space-y-8 text-right" dir="rtl">
+                <div className="flex items-center gap-6 justify-start">
                   <div className="w-20 h-20 bg-stone-100 rounded-3xl flex items-center justify-center font-black text-3xl text-stone-300 border-2 border-stone-50">
                     {user?.fullName?.charAt(0)}
                   </div>
                   <div>
                     <h3 className="text-xl font-bold text-stone-900">{user?.fullName}</h3>
                     <p className="text-stone-400 font-medium">{user?.email}</p>
-                    <span className="inline-block mt-1 bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase px-2 py-0.5 rounded-full">Verified Client</span>
+                    <span className="inline-block mt-1 bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase px-2 py-0.5 rounded-full">عميل موثق</span>
                   </div>
                 </div>
 
@@ -1488,32 +1487,32 @@ export default function App() {
 
                 <div className="space-y-6">
                   <div className="space-y-2">
-                    <label className="text-xs font-bold uppercase tracking-widest text-stone-400 flex justify-between">Full Name <Settings className="w-3 h-3" /></label>
+                    <label className="text-xs font-bold uppercase tracking-widest text-stone-400 flex justify-between">الاسم الكامل <Settings className="w-3 h-3" /></label>
                     <input
                       type="text"
                       value={profileForm.fullName || user?.fullName || ''}
                       onChange={(e) => setProfileForm({ ...profileForm, fullName: e.target.value })}
-                      className="w-full p-4 bg-stone-50 border border-stone-200 rounded-2xl outline-none focus:border-emerald-500"
+                      className="w-full p-4 bg-stone-50 border border-stone-200 rounded-2xl outline-none focus:border-emerald-500 text-right"
                     />
                   </div>
 
                   <div className="pt-4 border-t border-stone-50">
-                    <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-300 mb-6 font-bold">Change Password</h4>
+                    <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-300 mb-6 font-bold">تغيير كلمة المرور</h4>
                     <div className="space-y-4">
                       <div className="space-y-2">
-                        <label className="text-xs font-bold uppercase tracking-widest text-stone-400">Current Password</label>
+                        <label className="text-xs font-bold uppercase tracking-widest text-stone-400">كلمة المرور الحالية</label>
                         <input
                           type="password"
                           onChange={(e) => setProfileForm({ ...profileForm, currentPassword: e.target.value })}
-                          className="w-full p-4 bg-stone-50 border border-stone-200 rounded-2xl outline-none focus:border-emerald-500"
+                          className="w-full p-4 bg-stone-50 border border-stone-200 rounded-2xl outline-none focus:border-emerald-500 text-right"
                         />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-xs font-bold uppercase tracking-widest text-stone-400">New Password</label>
+                        <label className="text-xs font-bold uppercase tracking-widest text-stone-400">كلمة المرور الجديدة</label>
                         <input
                           type="password"
                           onChange={(e) => setProfileForm({ ...profileForm, newPassword: e.target.value })}
-                          className="w-full p-4 bg-stone-50 border border-stone-200 rounded-2xl outline-none focus:border-emerald-500"
+                          className="w-full p-4 bg-stone-50 border border-stone-200 rounded-2xl outline-none focus:border-emerald-500 text-right"
                         />
                       </div>
                     </div>
@@ -1523,7 +1522,7 @@ export default function App() {
                     onClick={handleSaveProfile}
                     className="w-full bg-stone-900 text-white py-5 rounded-3xl font-black uppercase tracking-tighter hover:bg-stone-800 transition-all shadow-xl shadow-stone-100 mt-4"
                   >
-                    Save All Changes
+                    حفظ جميع التغييرات
                   </button>
                 </div>
               </div>
