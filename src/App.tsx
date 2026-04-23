@@ -380,25 +380,6 @@ export default function App() {
     }
   };
 
-  const handleRateRequest = async (requestId: number, rating: number, review: string) => {
-    try {
-      await fetch(`/api/requests/${requestId}/rate`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('artisan_token')}`
-        },
-        body: JSON.stringify({ rating, review })
-      });
-      fetch('/api/requests/client', {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('artisan_token')}` }
-      })
-        .then(res => res.json())
-        .then(data => setClientRequests(data));
-    } catch (err) {
-      console.error(err);
-    }
-  };
 
   const [bookingArtisan, setBookingArtisan] = useState<Artisan | null>(null);
   const [bookingDesc, setBookingDesc] = useState('');
