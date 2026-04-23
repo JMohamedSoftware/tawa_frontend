@@ -20,16 +20,16 @@ function cn(...inputs: ClassValue[]) {
 
 // --- Types ---
 interface Category {
-  id: number;
+  id: string;
   name: string;
   slug: string;
   icon: string;
 }
 
 interface Artisan {
-  id: number;
+  id: string;
   full_name: string;
-  category_id: number;
+  category_id: string;
   category_name: string;
   category_slug: string;
   bio: string;
@@ -42,7 +42,7 @@ interface Artisan {
 }
 
 interface User {
-  id: number;
+  id: string;
   email: string;
   fullName: string;
   role: 'client' | 'artisan' | 'admin';
@@ -58,6 +58,10 @@ export default function App() {
   const [selectedArtisanPhotos, setSelectedArtisanPhotos] = useState<any[]>([]);
   const [user, setUser] = useState<User | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
+  
+  // Admin Data
+  const [adminTab, setAdminTab] = useState<'verifications' | 'accounts'>('verifications');
+  const [allUsers, setAllUsers] = useState<User[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [artisans, setArtisans] = useState<Artisan[]>([]);
   const [loading, setLoading] = useState(false);
@@ -79,11 +83,19 @@ export default function App() {
   // Fetch real data conditionally
   useEffect(() => {
     if (user?.role === 'admin' && view === 'admin-dashboard') {
-      fetch('/api/admin/pending-artisans', {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('artisan_token')}` }
-      })
-        .then(res => res.json())
-        .then(data => setPendingArtisans(data));
+      if (adminTab === 'verifications') {
+        fetch('/api/admin/pending-artisans', {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('artisan_token')}` }
+        })
+          .then(res => res.json())
+          .then(data => setPendingArtisans(data));
+      } else if (adminTab === 'accounts') {
+        fetch('/api/admin/users', {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('artisan_token')}` }
+        })
+          .then(res => res.json())
+          .then(data => setAllUsers(data));
+      }
     }
     if (user?.role === 'artisan' && view === 'artisan-dashboard') {
       fetch('/api/artisan/me', {
@@ -109,7 +121,7 @@ export default function App() {
         .then(res => res.json())
         .then(data => setClientRequests(data));
     }
-  }, [user, view]);
+  }, [user, view, adminTab]);
 
   // Socket Connection & Notifications
   useEffect(() => {
@@ -154,7 +166,7 @@ export default function App() {
     }, 5000);
   };
 
-  const fetchPhotos = (artisanId: number) => {
+  const fetchPhotos = (artisanId: string) => {
     fetch(`/api/artisans/${artisanId}/photos`)
       .then(res => res.json())
       .then(data => setArtisanPhotos(data));
@@ -182,7 +194,7 @@ export default function App() {
     }
   };
 
-  const handleVerify = async (artisanId: number, status: 'approved' | 'rejected') => {
+  const handleVerify = async (artisanId: string, status: 'approved' | 'rejected') => {
     try {
       await fetch('/api/admin/verify', {
         method: 'POST',
@@ -193,6 +205,21 @@ export default function App() {
         body: JSON.stringify({ artisanId, status })
       });
       setPendingArtisans(prev => prev.filter(a => a.id !== artisanId));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleDeleteUser = async (userId: string) => {
+    if (!window.confirm("Are you sure you want to completely delete this user and all associated data?")) return;
+    try {
+      await fetch(`/api/admin/users/${userId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('artisan_token')}`
+        }
+      });
+      setAllUsers(prev => prev.filter(u => u.id !== userId));
     } catch (err) {
       console.error(err);
     }
@@ -755,50 +782,114 @@ export default function App() {
               animate={{ opacity: 1 }}
               className="space-y-8"
             >
-              <div className="flex justify-between items-center">
-                <h2 className="text-3xl font-black tracking-tight">Verification Queue</h2>
-                <div className="bg-amber-100 text-amber-700 px-4 py-2 rounded-full text-xs font-bold uppercase">
-                  3 Pending Approval
+              <div className="flex flex-col gap-6">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-3xl font-black tracking-tight">Admin Dashboard</h2>
+                  <div className="flex gap-2 bg-stone-100 p-1 rounded-xl">
+                    <button
+                      onClick={() => setAdminTab('verifications')}
+                      className={cn("px-4 py-2 text-xs font-bold rounded-lg transition-all", adminTab === 'verifications' ? "bg-white text-stone-900 shadow-sm" : "text-stone-500 hover:bg-white/50")}
+                    >
+                      Verifications
+                    </button>
+                    <button
+                      onClick={() => setAdminTab('accounts')}
+                      className={cn("px-4 py-2 text-xs font-bold rounded-lg transition-all", adminTab === 'accounts' ? "bg-white text-stone-900 shadow-sm" : "text-stone-500 hover:bg-white/50")}
+                    >
+                      User Accounts
+                    </button>
+                  </div>
                 </div>
-              </div>
 
-              <div className="bg-white rounded-3xl border border-stone-200 overflow-hidden">
-                <table className="w-full text-left">
-                  <thead className="bg-stone-50 border-b border-stone-200">
-                    <tr>
-                      <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-stone-400">Artisan</th>
-                      <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-stone-400">Category</th>
-                      <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-stone-400">Documents</th>
-                      <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-stone-400">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-stone-100">
-                    {pendingArtisans.length > 0 ? pendingArtisans.map((item, i) => (
-                      <tr key={i} className="hover:bg-stone-50 transition-colors">
-                        <td className="px-6 py-4">
-                          <div className="font-bold text-stone-900">{item.full_name}</div>
-                          <div className="text-xs text-stone-500">{item.email}</div>
-                        </td>
-                        <td className="px-6 py-4 text-sm text-stone-600">{item.category_id || 'Not Set'}</td>
-                        <td className="px-6 py-4">
-                          <div className="flex gap-2">
-                            <span className="text-[10px] bg-stone-100 px-2 py-1 rounded border border-stone-200 text-stone-600">Pending Review</span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="flex gap-2">
-                            <button onClick={() => handleVerify(item.id, 'approved')} className="bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-emerald-700">Approve</button>
-                            <button onClick={() => handleVerify(item.id, 'rejected')} className="bg-rose-50 text-rose-600 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-rose-100">Reject</button>
-                          </div>
-                        </td>
-                      </tr>
-                    )) : (
-                      <tr>
-                        <td colSpan={4} className="px-6 py-12 text-center text-stone-400">Everything up to date!</td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
+                {adminTab === 'verifications' ? (
+                  <div className="bg-white rounded-3xl border border-stone-200 overflow-hidden">
+                    <table className="w-full text-left">
+                      <thead className="bg-stone-50 border-b border-stone-200">
+                        <tr>
+                          <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-stone-400">Artisan</th>
+                          <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-stone-400">Category</th>
+                          <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-stone-400">Documents</th>
+                          <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-stone-400">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-stone-100">
+                        {pendingArtisans.length > 0 ? pendingArtisans.map((item, i) => (
+                          <tr key={i} className="hover:bg-stone-50 transition-colors">
+                            <td className="px-6 py-4">
+                              <div className="font-bold text-stone-900">{item.full_name}</div>
+                              <div className="text-xs text-stone-500">{item.email}</div>
+                            </td>
+                            <td className="px-6 py-4 text-sm text-stone-600">{item.category_id || 'Not Set'}</td>
+                            <td className="px-6 py-4">
+                              <div className="flex gap-2">
+                                <span className="text-[10px] bg-stone-100 px-2 py-1 rounded border border-stone-200 text-stone-600">Pending Review</span>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="flex gap-2">
+                                <button onClick={() => handleVerify(item.id, 'approved')} className="bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-emerald-700">Approve</button>
+                                <button onClick={() => handleVerify(item.id, 'rejected')} className="bg-rose-50 text-rose-600 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-rose-100">Reject</button>
+                              </div>
+                            </td>
+                          </tr>
+                        )) : (
+                          <tr>
+                            <td colSpan={4} className="px-6 py-12 text-center text-stone-400">Everything up to date!</td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div className="bg-white rounded-3xl border border-stone-200 overflow-hidden">
+                    <table className="w-full text-left">
+                      <thead className="bg-stone-50 border-b border-stone-200">
+                        <tr>
+                          <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-stone-400">ID</th>
+                          <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-stone-400">Name / Email</th>
+                          <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-stone-400">Role</th>
+                          <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-stone-400">Joined</th>
+                          <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-stone-400">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-stone-100">
+                        {allUsers.length > 0 ? allUsers.map((u, i) => (
+                          <tr key={i} className="hover:bg-stone-50 transition-colors">
+                            <td className="px-6 py-4 text-sm font-bold text-stone-500">#{u.id}</td>
+                            <td className="px-6 py-4">
+                              <div className="font-bold text-stone-900">{u.fullName || 'N/A'}</div>
+                              <div className="text-xs text-stone-500">{u.email}</div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <span className={cn(
+                                "text-[10px] font-black uppercase px-2 py-1 rounded-md border",
+                                u.role === 'admin' ? "bg-purple-50 text-purple-600 border-purple-200" :
+                                u.role === 'artisan' ? "bg-emerald-50 text-emerald-600 border-emerald-200" :
+                                "bg-blue-50 text-blue-600 border-blue-200"
+                              )}>
+                                {u.role}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 text-sm text-stone-500">{(u as any).created_at ? new Date((u as any).created_at).toLocaleDateString() : 'Unknown'}</td>
+                            <td className="px-6 py-4">
+                              <button 
+                                onClick={() => handleDeleteUser(u.id)}
+                                disabled={u.role === 'admin'}
+                                className="bg-rose-50 text-rose-600 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-rose-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                              >
+                                Delete
+                              </button>
+                            </td>
+                          </tr>
+                        )) : (
+                          <tr>
+                            <td colSpan={5} className="px-6 py-12 text-center text-stone-400">No users found.</td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
             </motion.div>
           )}
@@ -919,7 +1010,7 @@ export default function App() {
                         <label className="text-xs font-bold text-stone-400 uppercase">Service Category</label>
                         <select
                           value={artisanProfile?.category_id || ''}
-                          onChange={(e) => setArtisanProfile({ ...artisanProfile, category_id: parseInt(e.target.value) })}
+                          onChange={(e) => setArtisanProfile({ ...artisanProfile, category_id: e.target.value })}
                           className="w-full p-3 bg-stone-50 border border-stone-200 rounded-xl focus:border-emerald-500 outline-none h-12 text-sm"
                         >
                           <option value="">Select Category</option>
