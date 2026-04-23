@@ -1,7 +1,7 @@
 import { Hammer, LogOut } from 'lucide-react';
 
 interface User {
-    id: number;
+    id: string;
     email: string;
     fullName: string;
     role: 'client' | 'artisan' | 'admin';

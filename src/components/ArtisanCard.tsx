@@ -8,7 +8,7 @@ function cn(...inputs: ClassValue[]) {
 }
 
 interface Artisan {
-    id: number;
+    id: string;
     full_name: string;
     category_name: string;
     category_slug: string;
