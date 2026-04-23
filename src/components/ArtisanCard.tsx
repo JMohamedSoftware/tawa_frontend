@@ -28,6 +28,7 @@ export const ArtisanCard = ({ artisan, onClick }: { artisan: Artisan, onClick: (
         animate={{ opacity: 1, y: 0 }}
         className="bg-white rounded-2xl border border-stone-200 p-5 hover:shadow-xl transition-all group cursor-pointer"
         onClick={onClick}
+        dir="rtl"
     >
         <div className="flex justify-between items-start mb-4">
             <div className="flex items-center gap-3">
@@ -40,36 +41,36 @@ export const ArtisanCard = ({ artisan, onClick }: { artisan: Artisan, onClick: (
                 </div>
             </div>
             {artisan.is_verified === 1 && (
-                <div className="bg-emerald-100 text-emerald-700 p-1 rounded-full" title="Verified Artisan">
+                <div className="bg-emerald-100 text-emerald-700 p-1 rounded-full" title="حرفي موثق">
                     <ShieldCheck className="w-4 h-4" />
                 </div>
             )}
         </div>
 
-        <div className="flex items-center gap-4 mb-4 text-sm">
+        <div className="flex items-center gap-4 mb-4 text-sm text-right">
             <div className="flex items-center gap-1 text-amber-500 font-bold">
                 <Star className="w-4 h-4 fill-current" />
                 <span>{artisan.avg_rating.toFixed(1)}</span>
             </div>
             <div className="flex items-center gap-1 text-stone-500">
                 <ClipboardList className="w-4 h-4" />
-                <span>{artisan.completed_jobs} jobs</span>
+                <span>{artisan.completed_jobs} عمل</span>
             </div>
             <div className="flex items-center gap-1 text-stone-500">
                 <MapPin className="w-4 h-4" />
-                <span>{artisan.distance_km} km</span>
+                <span>{artisan.distance_km} كم</span>
             </div>
         </div>
 
-        <p className="text-sm text-stone-600 line-clamp-2 mb-4 italic">"{artisan.bio || 'Professional artisan ready to help with your needs.'}"</p>
+        <p className="text-sm text-stone-600 line-clamp-2 mb-4 italic">"{artisan.bio || 'حرفي محترف مستعد لتلبية احتياجاتكم.'}"</p>
 
         <div className="flex items-center justify-between pt-4 border-t border-stone-100">
             <div className="flex items-center gap-2">
                 <div className={cn("w-2 h-2 rounded-full", artisan.is_online ? "bg-emerald-500 animate-pulse" : "bg-stone-300")} />
-                <span className="text-xs font-medium text-stone-500">{artisan.is_online ? 'Online' : 'Offline'}</span>
+                <span className="text-xs font-medium text-stone-500">{artisan.is_online ? 'متصل' : 'غير متصل'}</span>
             </div>
-            <button className="text-xs font-bold text-emerald-600 uppercase tracking-widest group-hover:translate-x-1 transition-transform">
-                View Profile →
+            <button className="text-xs font-bold text-emerald-600 uppercase tracking-widest group-hover:translate-x-[-4px] transition-transform">
+                عرض الملف الشخصي ←
             </button>
         </div>
     </motion.div>

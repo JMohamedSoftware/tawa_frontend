@@ -451,18 +451,18 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-stone-50 font-sans text-stone-900">
+    <div className="min-h-screen bg-stone-50 font-sans text-stone-900" dir="rtl">
       <Navbar user={user} onLogout={handleLogout} onNavigate={setView} />
 
       {/* Real-time Notifications Toast */}
-      <div className="fixed bottom-8 right-8 z-[100] space-y-3 pointer-events-none">
+      <div className="fixed bottom-8 left-8 z-[100] space-y-3 pointer-events-none">
         <AnimatePresence>
           {notifications.map(n => (
             <motion.div
               key={n.id}
-              initial={{ opacity: 0, x: 50, scale: 0.9 }}
+              initial={{ opacity: 0, x: -50, scale: 0.9 }}
               animate={{ opacity: 1, x: 0, scale: 1 }}
-              exit={{ opacity: 0, x: 20, scale: 0.9 }}
+              exit={{ opacity: 0, x: -20, scale: 0.9 }}
               className="bg-stone-900/95 backdrop-blur-md text-white p-5 rounded-2xl shadow-2xl border border-white/10 flex items-center gap-4 pointer-events-auto min-w-[300px]"
             >
               <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center shrink-0">
@@ -471,7 +471,7 @@ export default function App() {
               <p className="text-sm font-bold tracking-tight">{n.msg}</p>
               <button
                 onClick={() => setNotifications(prev => prev.filter(notif => notif.id !== n.id))}
-                className="ml-auto p-1 hover:bg-white/10 rounded-lg transition-colors"
+                className="mr-auto p-1 hover:bg-white/10 rounded-lg transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -491,7 +491,7 @@ export default function App() {
               className="bg-white w-full max-w-lg rounded-3xl p-8 shadow-2xl border border-stone-100 space-y-6"
             >
               <div className="flex justify-between items-center">
-                <h3 className="text-2xl font-black tracking-tight uppercase">Request Service</h3>
+                <h3 className="text-2xl font-black tracking-tight uppercase">طلب خدمة</h3>
                 <button onClick={() => setBookingArtisan(null)} className="p-2 hover:bg-stone-100 rounded-lg"><X className="w-5 h-5" /></button>
               </div>
 
@@ -504,18 +504,18 @@ export default function App() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold text-stone-400 uppercase">Problem Description</label>
+                <label className="text-xs font-bold text-stone-400 uppercase">وصف المشكلة</label>
                 <textarea
                   value={bookingDesc}
                   onChange={(e) => setBookingDesc(e.target.value)}
-                  placeholder="Describe what you need help with (e.g. My kitchen sink is leaking since this morning...)"
+                  placeholder="اشرح ما تحتاجه هنا... (مثال: صنبور المطبخ يسرب الماء منذ الصباح...)"
                   className="w-full p-4 bg-stone-50 border border-stone-200 rounded-2xl focus:border-emerald-500 outline-none h-32 text-sm"
                 />
               </div>
 
               <div className="bg-amber-50 p-4 rounded-xl border border-amber-100 flex items-start gap-3">
                 <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-                <p className="text-[10px] text-amber-800 font-medium">By confirming, your request will be sent to the artisan. They will contact you via phone or email once they accept.</p>
+                <p className="text-[10px] text-amber-800 font-medium">بتأكيد الطلب، سيتم إرساله إلى الحرفي. سيتواصل معك لاحقاً فور قبول الطلب.</p>
               </div>
 
               <button
@@ -537,7 +537,7 @@ export default function App() {
                       })
                     });
                     if (res.ok) {
-                      alert('Your request has been sent! You can track it in your dashboard.');
+                      addNotification('تم إرسال طلبك بنجاح! يمكنك متابعته من لوحة التحكم.');
                       setBookingArtisan(null);
                       setBookingDesc('');
                     }
@@ -548,7 +548,7 @@ export default function App() {
                 disabled={!bookingDesc}
                 className="w-full bg-stone-900 text-white py-4 rounded-2xl font-black uppercase tracking-tighter hover:bg-stone-800 disabled:opacity-50 disabled:cursor-not-allowed border-b-4 border-black"
               >
-                Confirm Booking Request
+                تأكيد طلب الخدمة
               </button>
             </motion.div>
           </div>
@@ -565,8 +565,8 @@ export default function App() {
               exit={{ opacity: 0, scale: 0.95 }}
               className="bg-white w-full max-w-md rounded-3xl p-8 shadow-2xl space-y-6"
             >
-              <h3 className="text-2xl font-black uppercase tracking-tighter text-stone-900 text-center">Rate Your Experience</h3>
-              <p className="text-center text-stone-500 text-sm">How was your service with <span className="font-bold text-stone-900">{ratingRequest.artisan_name}</span>?</p>
+              <h3 className="text-2xl font-black uppercase tracking-tighter text-stone-900 text-center">تقييم تجربتك</h3>
+              <p className="text-center text-stone-500 text-sm">كيف كانت جودة الخدمة مع <span className="font-bold text-stone-900">{ratingRequest.artisan_name}</span>؟</p>
               
               <div className="flex justify-center gap-2 py-4">
                 {[1, 2, 3, 4, 5].map(star => (
@@ -582,11 +582,11 @@ export default function App() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold uppercase tracking-widest text-stone-400">Your Review</label>
+                <label className="text-xs font-bold uppercase tracking-widest text-stone-400">رأيك الشخصي</label>
                 <textarea
                   value={ratingReview}
                   onChange={(e) => setRatingReview(e.target.value)}
-                  placeholder="Share your experience..."
+                  placeholder="أخبرنا بتجربتك..."
                   className="w-full p-4 bg-stone-50 border border-stone-200 rounded-2xl outline-none focus:border-emerald-500 h-32 resize-none"
                 />
               </div>
@@ -596,13 +596,13 @@ export default function App() {
                   onClick={() => setRatingRequest(null)}
                   className="flex-1 py-4 text-stone-400 font-bold uppercase tracking-widest text-sm hover:text-stone-600"
                 >
-                  Skip
+                  تخطي
                 </button>
                 <button
                   onClick={handleRateRequest}
                   className="flex-1 bg-stone-900 text-white py-4 rounded-2xl font-black uppercase tracking-tighter hover:bg-stone-800"
                 >
-                  Submit Review
+                  إرسال التقييم
                 </button>
               </div>
             </motion.div>
@@ -816,35 +816,35 @@ export default function App() {
               animate={{ opacity: 1, scale: 1 }}
               className="max-w-md mx-auto bg-white p-8 rounded-3xl shadow-xl border border-stone-100 mt-12"
             >
-              <h2 className="text-3xl font-black mb-6 text-center">Welcome Back</h2>
+              <h2 className="text-3xl font-black mb-6 text-center">أهلاً بك مجدداً</h2>
               {error && <div className="mb-4 p-3 bg-rose-50 text-rose-600 text-sm rounded-xl border border-rose-100">{error}</div>}
               <form className="space-y-4" onSubmit={handleLogin}>
                 <div className="space-y-1">
-                  <label className="text-xs font-bold uppercase tracking-widest text-stone-400">Email Address</label>
+                  <label className="text-xs font-bold uppercase tracking-widest text-stone-400">البريد الإلكتروني</label>
                   <input
                     type="email"
                     required
                     value={loginData.email}
                     onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
-                    className="w-full p-3 bg-stone-50 border border-stone-200 rounded-xl focus:border-emerald-500 outline-none"
+                    className="w-full p-3 bg-stone-50 border border-stone-200 rounded-xl focus:border-emerald-500 outline-none text-right"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-bold uppercase tracking-widest text-stone-400">Password</label>
+                  <label className="text-xs font-bold uppercase tracking-widest text-stone-400">كلمة المرور</label>
                   <input
                     type="password"
                     required
                     value={loginData.password}
                     onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
-                    className="w-full p-3 bg-stone-50 border border-stone-200 rounded-xl focus:border-emerald-500 outline-none"
+                    className="w-full p-3 bg-stone-50 border border-stone-200 rounded-xl focus:border-emerald-500 outline-none text-right"
                   />
                 </div>
                 <button className="w-full bg-emerald-600 text-white py-4 rounded-xl font-bold hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-100">
-                  Sign In
+                  تسجيل الدخول
                 </button>
               </form>
               <p className="mt-6 text-center text-sm text-stone-500">
-                Don't have an account? <button onClick={() => setView('register')} className="text-emerald-600 font-bold">Register</button>
+                ليس لديك حساب؟ <button onClick={() => setView('register')} className="text-emerald-600 font-bold">سجل الآن</button>
               </p>
             </motion.div>
           )}
@@ -856,7 +856,7 @@ export default function App() {
               animate={{ opacity: 1 }}
               className="space-y-8"
             >
-              <h2 className="text-3xl font-black tracking-tight">My Service Requests</h2>
+              <h2 className="text-3xl font-black tracking-tight">طلبات الخدمة الخاصة بي</h2>
               <div className="grid gap-6">
                 {clientRequests.length > 0 ? clientRequests.map((req, i) => (
                   <div key={i} className="bg-white p-6 rounded-3xl border border-stone-100 shadow-sm flex justify-between items-center">
@@ -869,10 +869,10 @@ export default function App() {
                             req.status === 'accepted' ? "bg-blue-50 text-blue-600 border-blue-100" :
                               "bg-emerald-600 text-white border-emerald-600"
                         )}>
-                          {req.status}
+                          {req.status === 'pending' ? 'قيد الانتظار' : req.status === 'accepted' ? 'تم القبول' : 'مكتمل'}
                         </span>
                       </div>
-                      <p className="text-sm text-stone-600 mb-1">Artisan: <span className="font-bold">{req.artisan_name}</span></p>
+                      <p className="text-sm text-stone-600 mb-1">الحرفي: <span className="font-bold">{req.artisan_name}</span></p>
                       <p className="text-xs text-stone-400 italic">"{req.description}"</p>
                     </div>
                     <div className="flex flex-col items-end gap-3">
@@ -905,8 +905,8 @@ export default function App() {
                 )) : (
                   <div className="bg-white p-12 rounded-3xl border border-stone-100 text-center space-y-4">
                     <ClipboardList className="w-12 h-12 text-stone-200 mx-auto" />
-                    <p className="text-stone-400">You haven't made any requests yet.</p>
-                    <button onClick={() => setView('home')} className="bg-stone-900 text-white px-6 py-2 rounded-xl text-xs font-bold">Start Searching</button>
+                    <p className="text-stone-400">لم تقم بإرسال أي طلبات بعد.</p>
+                    <button onClick={() => setView('home')} className="bg-stone-900 text-white px-6 py-2 rounded-xl text-xs font-bold">ابدأ البحث الآن</button>
                   </div>
                 )}
               </div>
@@ -922,57 +922,57 @@ export default function App() {
             >
               <div className="flex flex-col gap-6">
                 <div className="flex justify-between items-center">
-                  <h2 className="text-3xl font-black tracking-tight">Admin Dashboard</h2>
+                  <h2 className="text-3xl font-black tracking-tight">لوحة تحكم المسؤول</h2>
                   <div className="flex gap-2 bg-stone-100 p-1 rounded-xl">
                     <button
                       onClick={() => setAdminTab('verifications')}
                       className={cn("px-4 py-2 text-xs font-bold rounded-lg transition-all", adminTab === 'verifications' ? "bg-white text-stone-900 shadow-sm" : "text-stone-500 hover:bg-white/50")}
                     >
-                      Verifications
+                      طلبات التوثيق
                     </button>
                     <button
                       onClick={() => setAdminTab('accounts')}
                       className={cn("px-4 py-2 text-xs font-bold rounded-lg transition-all", adminTab === 'accounts' ? "bg-white text-stone-900 shadow-sm" : "text-stone-500 hover:bg-white/50")}
                     >
-                      User Accounts
+                      حسابات المستخدمين
                     </button>
                   </div>
                 </div>
 
                 {adminTab === 'verifications' ? (
                   <div className="bg-white rounded-3xl border border-stone-200 overflow-hidden">
-                    <table className="w-full text-left">
+                    <table className="w-full text-right" dir="rtl">
                       <thead className="bg-stone-50 border-b border-stone-200">
                         <tr>
-                          <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-stone-400">Artisan</th>
-                          <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-stone-400">Category</th>
-                          <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-stone-400">Documents</th>
-                          <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-stone-400">Actions</th>
+                          <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-stone-400 text-right">الحرفي</th>
+                          <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-stone-400 text-right">الفئة</th>
+                          <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-stone-400 text-right">الحالة</th>
+                          <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-stone-400 text-right">الإجراءات</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-stone-100">
                         {pendingArtisans.length > 0 ? pendingArtisans.map((item, i) => (
-                          <tr key={i} className="hover:bg-stone-50 transition-colors">
+                          <tr key={i} className="hover:bg-stone-50 transition-colors text-right">
                             <td className="px-6 py-4">
                               <div className="font-bold text-stone-900">{item.full_name}</div>
                               <div className="text-xs text-stone-500">{item.email}</div>
                             </td>
-                            <td className="px-6 py-4 text-sm text-stone-600">{item.category_id || 'Not Set'}</td>
+                            <td className="px-6 py-4 text-sm text-stone-600">{item.category_id || 'غير محدد'}</td>
                             <td className="px-6 py-4">
                               <div className="flex gap-2">
-                                <span className="text-[10px] bg-stone-100 px-2 py-1 rounded border border-stone-200 text-stone-600">Pending Review</span>
+                                <span className="text-[10px] bg-stone-100 px-2 py-1 rounded border border-stone-200 text-stone-600">في انتظار المراجعة</span>
                               </div>
                             </td>
                             <td className="px-6 py-4">
                               <div className="flex gap-2">
-                                <button onClick={() => handleVerify(item.id, 'approved')} className="bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-emerald-700">Approve</button>
-                                <button onClick={() => handleVerify(item.id, 'rejected')} className="bg-rose-50 text-rose-600 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-rose-100">Reject</button>
+                                <button onClick={() => handleVerify(item.id, 'approved')} className="bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-emerald-700 transition-colors">قبول</button>
+                                <button onClick={() => handleVerify(item.id, 'rejected')} className="bg-rose-50 text-rose-600 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-rose-100 transition-colors">رفض</button>
                               </div>
                             </td>
                           </tr>
                         )) : (
                           <tr>
-                            <td colSpan={4} className="px-6 py-12 text-center text-stone-400">Everything up to date!</td>
+                            <td colSpan={4} className="px-6 py-12 text-center text-stone-400">لا توجد طلبات معلقة حالياً.</td>
                           </tr>
                         )}
                       </tbody>
@@ -992,10 +992,10 @@ export default function App() {
                       </thead>
                       <tbody className="divide-y divide-stone-100">
                         {allUsers.length > 0 ? allUsers.map((u, i) => (
-                          <tr key={i} className="hover:bg-stone-50 transition-colors">
+                          <tr key={i} className="hover:bg-stone-50 transition-colors text-right">
                             <td className="px-6 py-4 text-sm font-bold text-stone-500">#{u.id}</td>
                             <td className="px-6 py-4">
-                              <div className="font-bold text-stone-900">{u.fullName || 'N/A'}</div>
+                              <div className="font-bold text-stone-900">{u.fullName || 'غير معروف'}</div>
                               <div className="text-xs text-stone-500">{u.email}</div>
                             </td>
                             <td className="px-6 py-4">
@@ -1005,23 +1005,23 @@ export default function App() {
                                 u.role === 'artisan' ? "bg-emerald-50 text-emerald-600 border-emerald-200" :
                                 "bg-blue-50 text-blue-600 border-blue-200"
                               )}>
-                                {u.role}
+                                {u.role === 'admin' ? 'مسؤول' : u.role === 'artisan' ? 'حرفي' : 'عميل'}
                               </span>
                             </td>
-                            <td className="px-6 py-4 text-sm text-stone-500">{(u as any).created_at ? new Date((u as any).created_at).toLocaleDateString() : 'Unknown'}</td>
+                            <td className="px-6 py-4 text-sm text-stone-500">{(u as any).created_at ? new Date((u as any).created_at).toLocaleDateString('ar-TN') : 'غير معروف'}</td>
                             <td className="px-6 py-4">
                               <button 
                                 onClick={() => handleDeleteUser(u.id)}
                                 disabled={u.role === 'admin'}
                                 className="bg-rose-50 text-rose-600 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-rose-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                               >
-                                Delete
+                                حذف
                               </button>
                             </td>
                           </tr>
                         )) : (
                           <tr>
-                            <td colSpan={5} className="px-6 py-12 text-center text-stone-400">No users found.</td>
+                            <td colSpan={5} className="px-6 py-12 text-center text-stone-400">لم يتم العثور على مستخدمين.</td>
                           </tr>
                         )}
                       </tbody>
@@ -1041,10 +1041,10 @@ export default function App() {
             >
               <div className="grid md:grid-cols-4 gap-4">
                 {[
-                  { label: "Total Earnings", val: "N/A", icon: Zap, color: "bg-emerald-500" },
-                  { label: "Completed Jobs", val: artisanProfile?.completed_jobs || 0, icon: ClipboardList, color: "bg-blue-500" },
-                  { label: "Avg Rating", val: (artisanProfile?.avg_rating || 0).toFixed(1), icon: Star, color: "bg-amber-500" },
-                  { label: "Verification", val: artisanProfile?.verification_status || 'pending', icon: ShieldCheck, color: "bg-purple-500" }
+                  { label: "إجمالي الأرباح", val: "غير متوفر", icon: Zap, color: "bg-emerald-500" },
+                  { label: "الأعمال المكتملة", val: artisanProfile?.completed_jobs || 0, icon: ClipboardList, color: "bg-blue-500" },
+                  { label: "متوسط التقييم", val: (artisanProfile?.avg_rating || 0).toFixed(1), icon: Star, color: "bg-amber-500" },
+                  { label: "حالة التوثيق", val: artisanProfile?.verification_status === 'approved' ? 'موثق' : 'قيد المراجعة', icon: ShieldCheck, color: "bg-purple-500" }
                 ].map((stat, i) => (
                   <div key={i} className="bg-white p-6 rounded-3xl border border-stone-100 shadow-sm">
                     <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center mb-4 text-white", stat.color)}>
@@ -1059,12 +1059,12 @@ export default function App() {
               <div className="grid md:grid-cols-2 gap-8">
                 <div className="bg-white p-8 rounded-3xl border border-stone-100 shadow-sm space-y-6">
                   <div className="flex justify-between items-center">
-                    <h3 className="text-xl font-bold">Active Requests</h3>
-                    <span className="text-xs font-bold text-stone-400 uppercase">{artisanRequests.length} Total</span>
+                    <h3 className="text-xl font-bold">الطلبات النشطة</h3>
+                    <span className="text-xs font-bold text-stone-400 uppercase">إجمالي {artisanRequests.length}</span>
                   </div>
                   <div className="space-y-4">
                     {artisanRequests.length > 0 ? artisanRequests.map((req, i) => (
-                      <div key={i} className="p-4 bg-stone-50 rounded-2xl border border-stone-200 flex justify-between items-center">
+                      <div key={i} className="p-4 bg-stone-50 rounded-2xl border border-stone-200 flex justify-between items-center text-right" dir="rtl">
                         <div>
                           <div className="flex items-center gap-2 mb-1">
                             <p className="font-bold text-stone-900">{req.category_name}</p>
@@ -1074,10 +1074,10 @@ export default function App() {
                                 req.status === 'accepted' ? "bg-emerald-50 text-emerald-600 border-emerald-100" :
                                   "bg-emerald-600 text-white border-emerald-600"
                             )}>
-                              {req.status}
+                              {req.status === 'pending' ? 'جديد' : req.status === 'accepted' ? 'مقبول' : 'مكتمل'}
                             </span>
                           </div>
-                          <p className="text-xs text-stone-500">Client: {req.client_name} • {req.description}</p>
+                          <p className="text-xs text-stone-500">العميل: {req.client_name} • {req.description}</p>
                         </div>
                         <div className="flex gap-2">
                           {req.status !== 'pending' && (
@@ -1094,13 +1094,13 @@ export default function App() {
                                 onClick={() => handleUpdateRequestStatus(req.id, 'accepted')}
                                 className="bg-emerald-600 text-white px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-tight hover:bg-emerald-700 transition-colors"
                               >
-                                Accept
+                                قبول
                               </button>
                               <button
                                 onClick={() => handleUpdateRequestStatus(req.id, 'rejected')}
                                 className="bg-white text-stone-400 border border-stone-200 px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-tight hover:bg-rose-50 hover:text-rose-600 hover:border-rose-100 transition-colors"
                               >
-                                Reject
+                                رفض
                               </button>
                             </>
                           )}
@@ -1109,27 +1109,27 @@ export default function App() {
                               onClick={() => handleUpdateRequestStatus(req.id, 'completed')}
                               className="bg-stone-900 text-white px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-tight"
                             >
-                              Mark Completed
+                              إتمام العمل
                             </button>
                           )}
                         </div>
                       </div>
                     )) : (
-                      <p className="text-center py-8 text-stone-400">No active requests found.</p>
+                      <p className="text-center py-8 text-stone-400">لا توجد طلبات نشطة حالياً.</p>
                     )}
                   </div>
                 </div>
 
                 <div className="bg-white p-8 rounded-3xl border border-stone-100 shadow-sm space-y-6">
                   <div className="flex justify-between items-center">
-                    <h3 className="text-xl font-bold">Portfolio Gallery</h3>
+                    <h3 className="text-xl font-bold">معرض الأعمال</h3>
                     <label className="bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs font-bold cursor-pointer hover:bg-emerald-700 transition-colors">
-                      Add Photo
+                      إضافة صورة
                       <input type="file" className="hidden" onChange={handleUploadPhoto} accept="image/*" />
                     </label>
                   </div>
                   <PhotoGallery photos={artisanPhotos} />
-                  <p className="text-sm text-stone-500">Add photos of your best work to attract more clients.</p>
+                  <p className="text-sm text-stone-500">أضف صوراً لأهم أعمالك لجذب المزيد من الزبائن.</p>
                 </div>
 
                 <div className="bg-white p-8 rounded-3xl border border-stone-100 shadow-sm space-y-6">
@@ -1259,59 +1259,59 @@ export default function App() {
               animate={{ opacity: 1, scale: 1 }}
               className="max-w-md mx-auto bg-white p-8 rounded-3xl shadow-xl border border-stone-100 mt-12"
             >
-              <h2 className="text-3xl font-black mb-6 text-center">Join Artisan.tn</h2>
+              <h2 className="text-3xl font-black mb-6 text-center">انضم إلى تعاوني</h2>
               <div className="flex gap-2 mb-8 p-1 bg-stone-100 rounded-xl">
                 <button
                   onClick={() => setRegData({ ...regData, role: 'client' })}
                   className={cn("flex-1 py-2 text-xs font-bold rounded-lg transition-all", regData.role === 'client' ? "bg-white text-stone-900 shadow-sm" : "text-stone-500 hover:bg-white/50")}
                 >
-                  I'm a Client
+                  أنا عميل
                 </button>
                 <button
                   onClick={() => setRegData({ ...regData, role: 'artisan' })}
                   className={cn("flex-1 py-2 text-xs font-bold rounded-lg transition-all", regData.role === 'artisan' ? "bg-white text-stone-900 shadow-sm" : "text-stone-500 hover:bg-white/50")}
                 >
-                  I'm an Artisan
+                  أنا حرفي
                 </button>
               </div>
               {error && <div className="mb-4 p-3 bg-rose-50 text-rose-600 text-sm rounded-xl border border-rose-100">{error}</div>}
               <form className="space-y-4" onSubmit={handleRegister}>
                 <div className="space-y-1">
-                  <label className="text-xs font-bold uppercase tracking-widest text-stone-400">Full Name</label>
+                  <label className="text-xs font-bold uppercase tracking-widest text-stone-400">الاسم الكامل</label>
                   <input
                     type="text"
                     required
                     value={regData.fullName}
                     onChange={(e) => setRegData({ ...regData, fullName: e.target.value })}
-                    className="w-full p-3 bg-stone-50 border border-stone-200 rounded-xl focus:border-emerald-500 outline-none"
+                    className="w-full p-3 bg-stone-50 border border-stone-200 rounded-xl focus:border-emerald-500 outline-none text-right"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-bold uppercase tracking-widest text-stone-400">Email</label>
+                  <label className="text-xs font-bold uppercase tracking-widest text-stone-400">البريد الإلكتروني</label>
                   <input
                     type="email"
                     required
                     value={regData.email}
                     onChange={(e) => setRegData({ ...regData, email: e.target.value })}
-                    className="w-full p-3 bg-stone-50 border border-stone-200 rounded-xl focus:border-emerald-500 outline-none"
+                    className="w-full p-3 bg-stone-50 border border-stone-200 rounded-xl focus:border-emerald-500 outline-none text-right"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-bold uppercase tracking-widest text-stone-400">Password</label>
+                  <label className="text-xs font-bold uppercase tracking-widest text-stone-400">كلمة المرور</label>
                   <input
                     type="password"
                     required
                     value={regData.password}
                     onChange={(e) => setRegData({ ...regData, password: e.target.value })}
-                    className="w-full p-3 bg-stone-50 border border-stone-200 rounded-xl focus:border-emerald-500 outline-none"
+                    className="w-full p-3 bg-stone-50 border border-stone-200 rounded-xl focus:border-emerald-500 outline-none text-right"
                   />
                 </div>
                 <button className="w-full bg-emerald-600 text-white py-4 rounded-xl font-bold hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-100">
-                  Create Account
+                  إنشاء حساب
                 </button>
               </form>
               <p className="mt-6 text-center text-sm text-stone-500">
-                Already have an account? <button onClick={() => setView('login')} className="text-emerald-600 font-bold">Login</button>
+                لديك حساب بالفعل؟ <button onClick={() => setView('login')} className="text-emerald-600 font-bold">تسجيل الدخول</button>
               </p>
             </motion.div>
           )}
