@@ -14,7 +14,7 @@ export const Navbar = ({ user, onLogout, onNavigate }: { user: User | null, onLo
                 <div className="bg-emerald-600 p-1.5 rounded-lg">
                     <Hammer className="text-white w-5 h-5" />
                 </div>
-                <span className="text-xl font-bold tracking-tight text-stone-900">تعاوني<span className="text-emerald-600">.تونس</span></span>
+                <span className="text-xl font-bold tracking-tight text-stone-900">حرفي<span className="text-emerald-600">.تونس</span></span>
             </div>
 
             <div className="flex items-center gap-2 sm:gap-6">
