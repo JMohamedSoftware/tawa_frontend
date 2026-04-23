@@ -1,10 +1,11 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
 import {
   Search, MapPin, Star, ShieldCheck, Hammer,
   Zap, Droplets, Paintbrush, Wind, Leaf,
   User, LogOut, LayoutDashboard, ClipboardList,
-  CheckCircle2, Clock, AlertCircle, Menu, X
+  CheckCircle2, Clock, AlertCircle, Menu, X,
+  Send, MessageCircle, Bell, Map, Settings
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { clsx, type ClassValue } from 'clsx';
@@ -80,6 +81,24 @@ export default function App() {
   const [notifications, setNotifications] = useState<any[]>([]);
   const socketRef = useRef<Socket | null>(null);
 
+  // Chat state
+  const [chatArtisan, setChatArtisan] = useState<any>(null);
+  const [chatMessages, setChatMessages] = useState<any[]>([]);
+  const [chatInput, setChatInput] = useState('');
+  const chatEndRef = useRef<HTMLDivElement>(null);
+
+  // Rating modal state
+  const [ratingRequest, setRatingRequest] = useState<any>(null);
+  const [ratingValue, setRatingValue] = useState(5);
+  const [ratingReview, setRatingReview] = useState('');
+
+  // Notification history
+  const [notifHistory, setNotifHistory] = useState<any[]>([]);
+
+  // Profile edit state
+  const [profileForm, setProfileForm] = useState({ fullName: '', currentPassword: '', newPassword: '' });
+  const [profileMsg, setProfileMsg] = useState<string | null>(null);
+
   // Fetch real data conditionally
   useEffect(() => {
     if (user?.role === 'admin' && view === 'admin-dashboard') {
@@ -153,14 +172,24 @@ export default function App() {
       addNotification("🎉 Work is DONE! Please rate your artisan.");
     });
 
+    socketRef.current.on("new_message", (data) => {
+      setChatMessages(prev => [...prev, { ...data, is_mine: data.sender_id === user?.id }]);
+      if (view !== 'chat' || chatArtisan?.id !== data.room_id.split('_').find((id: any) => id !== user?.id)) {
+        addNotification(`💬 New message: ${data.message}`);
+      }
+      setTimeout(() => chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
+    });
+
     return () => {
       socketRef.current?.disconnect();
     };
-  }, [user]);
+  }, [user, view, chatArtisan]);
 
   const addNotification = (msg: string) => {
     const id = Date.now();
-    setNotifications(prev => [...prev, { id, msg }]);
+    const newNotif = { id, msg, time: new Date().toLocaleTimeString() };
+    setNotifications(prev => [...prev, newNotif]);
+    setNotifHistory(prev => [newNotif, ...prev].slice(0, 50));
     setTimeout(() => {
       setNotifications(prev => prev.filter(n => n.id !== id));
     }, 5000);
@@ -374,6 +403,72 @@ export default function App() {
   const [bookingArtisan, setBookingArtisan] = useState<Artisan | null>(null);
   const [bookingDesc, setBookingDesc] = useState('');
 
+  // ─── Handle Rating Submission ──────────────────────────────────────
+  const handleRateRequest = async () => {
+    if (!ratingRequest) return;
+    try {
+      await fetch(`/api/requests/${ratingRequest.id}/rate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('artisan_token')}` },
+        body: JSON.stringify({ rating: ratingValue, review: ratingReview })
+      });
+      setClientRequests(prev => prev.map(r => r.id === ratingRequest.id ? { ...r, rating: ratingValue, review: ratingReview } : r));
+      setRatingRequest(null);
+      setRatingValue(5);
+      setRatingReview('');
+      addNotification('⭐ Rating submitted! Thank you!');
+    } catch (err) { console.error(err); }
+  };
+
+  // ─── Handle Chat ───────────────────────────────────────────────────
+  const openChat = async (target: { artisanProfileId: string, clientId: string, name: string }) => {
+    setChatArtisan(target);
+    setView('chat');
+    try {
+      const res = await fetch(`/api/chat/${target.artisanProfileId}/${target.clientId}`, {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('artisan_token')}` }
+      });
+      const data = await res.json();
+      setChatMessages(data);
+      setTimeout(() => chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+    } catch (err) { console.error(err); }
+  };
+
+  const handleSendChat = async () => {
+    if (!chatInput.trim() || !chatArtisan) return;
+    const msg = chatInput;
+    setChatInput('');
+    try {
+      await fetch(`/api/chat/${chatArtisan.artisanProfileId}/${chatArtisan.clientId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('artisan_token')}` },
+        body: JSON.stringify({ message: msg })
+      });
+      // Message will come back via Socket.io
+    } catch (err) { console.error(err); }
+  };
+
+  // ─── Handle Profile Save ───────────────────────────────────────────
+  const handleSaveProfile = async () => {
+    setProfileMsg(null);
+    try {
+      const res = await fetch('/api/client/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('artisan_token')}` },
+        body: JSON.stringify(profileForm)
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      if (data.user) {
+        localStorage.setItem('artisan_user', JSON.stringify(data.user));
+        setUser(data.user);
+      }
+      setProfileMsg('✅ Profile updated successfully!');
+    } catch (err: any) {
+      setProfileMsg(`❌ ${err.message}`);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-stone-50 font-sans text-stone-900">
       <Navbar user={user} onLogout={handleLogout} onNavigate={setView} />
@@ -474,6 +569,61 @@ export default function App() {
               >
                 Confirm Booking Request
               </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Rating Modal */}
+      <AnimatePresence>
+        {ratingRequest && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white w-full max-w-md rounded-3xl p-8 shadow-2xl space-y-6"
+            >
+              <h3 className="text-2xl font-black uppercase tracking-tighter text-stone-900 text-center">Rate Your Experience</h3>
+              <p className="text-center text-stone-500 text-sm">How was your service with <span className="font-bold text-stone-900">{ratingRequest.artisan_name}</span>?</p>
+              
+              <div className="flex justify-center gap-2 py-4">
+                {[1, 2, 3, 4, 5].map(star => (
+                  <Star
+                    key={star}
+                    onClick={() => setRatingValue(star)}
+                    className={cn(
+                      "w-10 h-10 cursor-pointer transition-all",
+                      star <= ratingValue ? "text-amber-400 fill-current" : "text-stone-200"
+                    )}
+                  />
+                ))}
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-bold uppercase tracking-widest text-stone-400">Your Review</label>
+                <textarea
+                  value={ratingReview}
+                  onChange={(e) => setRatingReview(e.target.value)}
+                  placeholder="Share your experience..."
+                  className="w-full p-4 bg-stone-50 border border-stone-200 rounded-2xl outline-none focus:border-emerald-500 h-32 resize-none"
+                />
+              </div>
+
+              <div className="flex gap-4">
+                <button
+                  onClick={() => setRatingRequest(null)}
+                  className="flex-1 py-4 text-stone-400 font-bold uppercase tracking-widest text-sm hover:text-stone-600"
+                >
+                  Skip
+                </button>
+                <button
+                  onClick={handleRateRequest}
+                  className="flex-1 bg-stone-900 text-white py-4 rounded-2xl font-black uppercase tracking-tighter hover:bg-stone-800"
+                >
+                  Submit Review
+                </button>
+              </div>
             </motion.div>
           </div>
         )}
@@ -602,7 +752,7 @@ export default function App() {
                 </div>
                 <div className="md:w-64 space-y-4">
                   <button
-                    onClick={() => alert(`Sending request to ${selectedArtisan.full_name}...`)}
+                    onClick={() => setBookingArtisan(selectedArtisan)}
                     className="w-full bg-stone-900 text-white py-4 rounded-2xl font-bold border-b-4 border-black hover:bg-stone-800 transition-all flex items-center justify-center gap-2"
                   >
                     REQUEST SERVICE
@@ -744,19 +894,26 @@ export default function App() {
                       <p className="text-sm text-stone-600 mb-1">Artisan: <span className="font-bold">{req.artisan_name}</span></p>
                       <p className="text-xs text-stone-400 italic">"{req.description}"</p>
                     </div>
-                    <div>
-                      {req.status === 'completed' && !req.rating && (
-                        <div className="flex flex-col items-end gap-2">
-                          <div className="flex gap-1">
-                            {[1, 2, 3, 4, 5].map(star => (
-                              <Star
-                                onClick={() => handleRateRequest(req.id, star, "Great service!")}
-                                key={star} className="w-5 h-5 text-stone-200 hover:text-amber-400 cursor-pointer transition-colors" />
-                            ))}
-                          </div>
-                          <p className="text-[10px] font-bold text-stone-400">Tap to rate</p>
-                        </div>
-                      )}
+                    <div className="flex flex-col items-end gap-3">
+                      <div className="flex gap-2">
+                        {req.status !== 'pending' && (
+                          <button
+                            onClick={() => openChat({ artisanProfileId: req.artisan_id, clientId: req.client_id, name: req.artisan_name })}
+                            className="bg-stone-50 text-stone-500 p-2 rounded-xl border border-stone-200 hover:bg-emerald-50 hover:text-emerald-600 transition-colors"
+                          >
+                            <MessageCircle className="w-4 h-4" />
+                          </button>
+                        )}
+                        {req.status === 'completed' && !req.rating && (
+                          <button
+                            onClick={() => setRatingRequest(req)}
+                            className="bg-amber-50 text-amber-600 p-2 rounded-xl border border-amber-100 hover:bg-amber-100 transition-colors"
+                          >
+                            <Star className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+
                       {req.rating && (
                         <div className="flex items-center gap-1 text-amber-500">
                           {[...Array(req.rating)].map((_, i) => <Star key={i} className="w-4 h-4 fill-current" />)}
@@ -942,6 +1099,14 @@ export default function App() {
                           <p className="text-xs text-stone-500">Client: {req.client_name} • {req.description}</p>
                         </div>
                         <div className="flex gap-2">
+                          {req.status !== 'pending' && (
+                            <button
+                              onClick={() => openChat({ artisanProfileId: req.artisan_id, clientId: req.client_id, name: req.client_name })}
+                              className="bg-stone-100 text-stone-500 p-2 rounded-xl hover:bg-emerald-50 hover:text-emerald-600 transition-colors"
+                            >
+                              <MessageCircle className="w-3 h-3" />
+                            </button>
+                          )}
                           {req.status === 'pending' && (
                             <>
                               <button
@@ -1170,6 +1335,219 @@ export default function App() {
             </motion.div>
           )}
 
+          {view === 'chat' && chatArtisan && (
+            <motion.div
+              key="chat"
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -50 }}
+              className="max-w-2xl mx-auto bg-white rounded-3xl shadow-2xl border border-stone-100 flex flex-col h-[700px] overflow-hidden"
+            >
+              <div className="p-6 border-b border-stone-100 flex justify-between items-center bg-stone-50">
+                <div className="flex items-center gap-4">
+                  <button onClick={() => setView('client-dashboard')} className="p-2 hover:bg-stone-200 rounded-xl transition-colors"><X className="w-5 h-5 text-stone-400" /></button>
+                  <div>
+                    <h3 className="font-black uppercase tracking-tighter text-stone-900">{chatArtisan.full_name || chatArtisan.fullName}</h3>
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                      <span className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Active Chat</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-stone-50/50">
+                {chatMessages.map((m, i) => (
+                  <div key={i} className={cn("flex", m.is_mine ? "justify-end" : "justify-start")}>
+                    <div className={cn(
+                      "max-w-[80%] p-4 rounded-2xl text-sm font-medium shadow-sm",
+                      m.is_mine ? "bg-stone-900 text-white rounded-br-none" : "bg-white text-stone-900 border border-stone-200 rounded-bl-none"
+                    )}>
+                      <p>{m.message}</p>
+                      <p className={cn("text-[9px] mt-1 opacity-50", m.is_mine ? "text-right" : "")}>
+                        {new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+                <div ref={chatEndRef} />
+              </div>
+
+              <div className="p-4 border-t border-stone-100 bg-white">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={chatInput}
+                    onChange={(e) => setChatInput(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSendChat()}
+                    placeholder="Type your message..."
+                    className="flex-1 p-4 bg-stone-50 border border-stone-200 rounded-2xl outline-none focus:border-emerald-500"
+                  />
+                  <button
+                    onClick={handleSendChat}
+                    className="bg-emerald-600 text-white p-4 rounded-2xl hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-100"
+                  >
+                    <Send className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {view === 'map' && (
+            <motion.div
+              key="map"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="space-y-8"
+            >
+              <div className="flex justify-between items-center">
+                <h2 className="text-3xl font-black tracking-tighter uppercase">Artisan Radar</h2>
+                <div className="flex gap-2">
+                  <button onClick={() => setView('home')} className="text-xs font-bold text-stone-400 uppercase tracking-widest hover:text-stone-600 transition-colors">Close View</button>
+                </div>
+              </div>
+
+              <div className="grid lg:grid-cols-3 gap-8">
+                <div className="lg:col-span-2 bg-stone-200 rounded-3xl h-[600px] relative overflow-hidden flex items-center justify-center border-4 border-white shadow-2xl">
+                  <div className="absolute inset-0 bg-[radial-gradient(#000_1px,transparent_1px)] [background-size:20px_20px] opacity-10" />
+                  <div className="text-center space-y-4 z-10">
+                    <div className="w-20 h-20 bg-emerald-600 rounded-full flex items-center justify-center mx-auto animate-ping opacity-20 absolute top-1/2 left-1/2 -ml-10 -mt-10" />
+                    <MapPin className="w-12 h-12 text-emerald-600 mx-auto" />
+                    <p className="font-black text-stone-400 uppercase tracking-widest text-xs">Scanning artisans in your area...</p>
+                    <div className="flex gap-2 justify-center">
+                      <div className="w-2 h-2 bg-emerald-500 rounded-full animate-bounce [animation-delay:-0.3s]" />
+                      <div className="w-2 h-2 bg-emerald-500 rounded-full animate-bounce [animation-delay:-0.15s]" />
+                      <div className="w-2 h-2 bg-emerald-500 rounded-full animate-bounce" />
+                    </div>
+                  </div>
+                  {/* Mock artisan locations */}
+                  <div className="absolute top-1/4 left-1/3 w-3 h-3 bg-emerald-500 rounded-full shadow-lg shadow-emerald-200 cursor-pointer hover:scale-150 transition-transform" />
+                  <div className="absolute top-1/2 right-1/4 w-3 h-3 bg-emerald-500 rounded-full shadow-lg shadow-emerald-200 cursor-pointer hover:scale-150 transition-transform" />
+                  <div className="absolute bottom-1/3 left-1/2 w-3 h-3 bg-emerald-500 rounded-full shadow-lg shadow-emerald-200 cursor-pointer hover:scale-150 transition-transform" />
+                </div>
+                
+                <div className="bg-white p-8 rounded-3xl border border-stone-100 shadow-sm space-y-6 overflow-y-auto max-h-[600px]">
+                  <h3 className="font-bold text-lg uppercase tracking-tight text-stone-900">Nearby Artisans</h3>
+                  <div className="space-y-4">
+                    {artisans.length > 0 ? artisans.map((a, i) => (
+                      <div key={i} className="p-4 bg-stone-50 rounded-2xl border border-stone-200 flex items-center gap-4 group cursor-pointer hover:border-emerald-200 hover:bg-emerald-50/50 transition-all" onClick={() => { setSelectedArtisan(a); setView('artisan-detail'); }}>
+                        <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center font-black text-emerald-600 border border-stone-100 shadow-sm group-hover:bg-emerald-600 group-hover:text-white transition-colors">{a.full_name.charAt(0)}</div>
+                        <div>
+                          <p className="font-bold text-sm text-stone-900">{a.full_name}</p>
+                          <p className="text-[10px] text-stone-400 font-bold uppercase">{a.category_name} • {a.distance_km} km</p>
+                        </div>
+                      </div>
+                    )) : <p className="text-xs text-stone-400 font-bold italic">Search to find artisans nearby...</p>}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {view === 'notifications' && (
+            <motion.div
+              key="notifications"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="max-w-2xl mx-auto space-y-8"
+            >
+              <div className="flex justify-between items-center">
+                <h2 className="text-3xl font-black tracking-tighter uppercase text-stone-900">Notifications</h2>
+                <button onClick={() => setNotifHistory([])} className="text-xs font-bold text-rose-500 uppercase tracking-widest">Clear All</button>
+              </div>
+
+              <div className="space-y-4">
+                {notifHistory.length > 0 ? notifHistory.map((n, i) => (
+                  <div key={i} className="bg-white p-6 rounded-3xl border border-stone-100 shadow-sm flex items-start gap-4 hover:shadow-md transition-shadow">
+                    <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center shrink-0">
+                      <Bell className="w-5 h-5 text-emerald-600" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-stone-900 text-sm">{n.msg}</p>
+                      <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest mt-1">{n.time}</p>
+                    </div>
+                  </div>
+                )) : (
+                  <div className="text-center py-24 bg-white rounded-3xl border border-stone-100">
+                    <Bell className="w-12 h-12 text-stone-100 mx-auto mb-4" />
+                    <p className="text-stone-400 font-bold uppercase tracking-widest text-xs">No notifications yet</p>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
+
+          {view === 'client-profile' && (
+            <motion.div
+              key="profile"
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="max-w-xl mx-auto space-y-8"
+            >
+              <h2 className="text-3xl font-black tracking-tighter uppercase text-stone-900">Account Settings</h2>
+              
+              <div className="bg-white p-8 rounded-3xl border border-stone-100 shadow-xl space-y-8">
+                <div className="flex items-center gap-6">
+                  <div className="w-20 h-20 bg-stone-100 rounded-3xl flex items-center justify-center font-black text-3xl text-stone-300 border-2 border-stone-50">
+                    {user?.fullName?.charAt(0)}
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-stone-900">{user?.fullName}</h3>
+                    <p className="text-stone-400 font-medium">{user?.email}</p>
+                    <span className="inline-block mt-1 bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase px-2 py-0.5 rounded-full">Verified Client</span>
+                  </div>
+                </div>
+
+                {profileMsg && (
+                  <div className={cn("p-4 rounded-2xl text-sm font-bold border", profileMsg.includes('✅') ? "bg-emerald-50 text-emerald-600 border-emerald-100" : "bg-rose-50 text-rose-600 border-rose-100")}>
+                    {profileMsg}
+                  </div>
+                )}
+
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold uppercase tracking-widest text-stone-400 flex justify-between">Full Name <Settings className="w-3 h-3" /></label>
+                    <input
+                      type="text"
+                      value={profileForm.fullName || user?.fullName || ''}
+                      onChange={(e) => setProfileForm({ ...profileForm, fullName: e.target.value })}
+                      className="w-full p-4 bg-stone-50 border border-stone-200 rounded-2xl outline-none focus:border-emerald-500"
+                    />
+                  </div>
+
+                  <div className="pt-4 border-t border-stone-50">
+                    <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-300 mb-6 font-bold">Change Password</h4>
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold uppercase tracking-widest text-stone-400">Current Password</label>
+                        <input
+                          type="password"
+                          onChange={(e) => setProfileForm({ ...profileForm, currentPassword: e.target.value })}
+                          className="w-full p-4 bg-stone-50 border border-stone-200 rounded-2xl outline-none focus:border-emerald-500"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold uppercase tracking-widest text-stone-400">New Password</label>
+                        <input
+                          type="password"
+                          onChange={(e) => setProfileForm({ ...profileForm, newPassword: e.target.value })}
+                          className="w-full p-4 bg-stone-50 border border-stone-200 rounded-2xl outline-none focus:border-emerald-500"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={handleSaveProfile}
+                    className="w-full bg-stone-900 text-white py-5 rounded-3xl font-black uppercase tracking-tighter hover:bg-stone-800 transition-all shadow-xl shadow-stone-100 mt-4"
+                  >
+                    Save All Changes
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          )}
         </AnimatePresence>
       </main>
 
