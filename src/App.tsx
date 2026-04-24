@@ -681,7 +681,15 @@ export default function App() {
               <section className="space-y-6">
                 <div className="flex justify-between items-end">
                   <h2 className="text-2xl font-bold tracking-tight">الفئات الشائعة</h2>
-                  <button className="text-sm font-bold text-emerald-600 uppercase tracking-widest">عرض الكل</button>
+                  <button 
+                    onClick={() => {
+                      setSelectedCategory(null);
+                      handleSearch(undefined);
+                    }}
+                    className="text-sm font-bold text-emerald-600 uppercase tracking-widest hover:text-emerald-700 transition-colors"
+                  >
+                    عرض الكل
+                  </button>
                 </div>
                 <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar">
                   {categories.map(cat => (
@@ -730,7 +738,7 @@ export default function App() {
                 <meta property="og:image" content={selectedArtisan.profile_image || "https://tawa.tn/default-artisan.jpg"} />
               </Helmet>
               <button onClick={() => setView('search-results')} className="text-sm font-bold text-stone-400 hover:text-stone-600 mb-2 flex items-center gap-1 uppercase tracking-widest text-right" dir="rtl">
-                ← العودة إلى النتائج
+                العودة إلى النتائج →
               </button>
 
               <div className="bg-white rounded-3xl border border-stone-100 p-8 shadow-sm flex flex-col md:flex-row gap-8 text-right" dir="rtl">
@@ -780,7 +788,7 @@ export default function App() {
                   </button>
                   <div className="px-4 py-3 bg-stone-50 rounded-xl border border-stone-200 flex items-center gap-3">
                     <div className={cn("w-2 h-2 rounded-full", selectedArtisan.is_online ? "bg-emerald-500 animate-pulse" : "bg-stone-300")} />
-                    <span className="text-xs font-bold text-stone-500 uppercase">{selectedArtisan.is_online ? 'Available Now' : 'Currently Offline'}</span>
+                    <span className="text-xs font-bold text-stone-500 uppercase">{selectedArtisan.is_online ? 'متوفر الآن' : 'غير متصل'}</span>
                   </div>
                 </div>
               </div>
@@ -803,7 +811,7 @@ export default function App() {
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 text-right" dir="rtl">
                 <div>
                   <button onClick={() => setView('home')} className="text-sm font-bold text-stone-400 hover:text-stone-600 mb-2 flex items-center gap-1 uppercase tracking-widest justify-end">
-                    ← العودة للرئيسية
+                    العودة للرئيسية →
                   </button>
                   <h2 className="text-3xl font-black tracking-tight">
                     تم العثور على {artisans.length} حرفياً
@@ -1023,11 +1031,11 @@ export default function App() {
                     <table className="w-full text-left">
                       <thead className="bg-stone-50 border-b border-stone-200">
                         <tr>
-                          <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-stone-400">ID</th>
-                          <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-stone-400">Name / Email</th>
-                          <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-stone-400">Role</th>
-                          <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-stone-400">Joined</th>
-                          <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-stone-400">Actions</th>
+                          <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-stone-400">المعرف</th>
+                          <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-stone-400">الاسم / البريد</th>
+                          <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-stone-400">الدور</th>
+                          <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-stone-400">تاريخ الانضمام</th>
+                          <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-stone-400">الإجراءات</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-stone-100">
@@ -1423,9 +1431,9 @@ export default function App() {
               className="space-y-8"
             >
               <div className="flex justify-between items-center">
-                <h2 className="text-3xl font-black tracking-tighter uppercase">Artisan Radar</h2>
+                <h2 className="text-3xl font-black tracking-tighter uppercase">رادار الحرفيين</h2>
                 <div className="flex gap-2">
-                  <button onClick={() => setView('home')} className="text-xs font-bold text-stone-400 uppercase tracking-widest hover:text-stone-600 transition-colors">Close View</button>
+                  <button onClick={() => setView('home')} className="text-xs font-bold text-stone-400 uppercase tracking-widest hover:text-stone-600 transition-colors">إغلاق المعاينة</button>
                 </div>
               </div>
 
@@ -1435,7 +1443,7 @@ export default function App() {
                   <div className="text-center space-y-4 z-10">
                     <div className="w-20 h-20 bg-emerald-600 rounded-full flex items-center justify-center mx-auto animate-ping opacity-20 absolute top-1/2 left-1/2 -ml-10 -mt-10" />
                     <MapPin className="w-12 h-12 text-emerald-600 mx-auto" />
-                    <p className="font-black text-stone-400 uppercase tracking-widest text-xs">Scanning artisans in your area...</p>
+                    <p className="font-black text-stone-400 uppercase tracking-widest text-xs">جاري البحث عن حرفيين في منطقتك...</p>
                     <div className="flex gap-2 justify-center">
                       <div className="w-2 h-2 bg-emerald-500 rounded-full animate-bounce [animation-delay:-0.3s]" />
                       <div className="w-2 h-2 bg-emerald-500 rounded-full animate-bounce [animation-delay:-0.15s]" />
@@ -1449,7 +1457,7 @@ export default function App() {
                 </div>
                 
                 <div className="bg-white p-8 rounded-3xl border border-stone-100 shadow-sm space-y-6 overflow-y-auto max-h-[600px]">
-                  <h3 className="font-bold text-lg uppercase tracking-tight text-stone-900">Nearby Artisans</h3>
+                  <h3 className="font-bold text-lg uppercase tracking-tight text-stone-900">حرفيون قريبون</h3>
                   <div className="space-y-4">
                     {artisans.length > 0 ? artisans.map((a, i) => (
                       <div key={i} className="p-4 bg-stone-50 rounded-2xl border border-stone-200 flex items-center gap-4 group cursor-pointer hover:border-emerald-200 hover:bg-emerald-50/50 transition-all" onClick={() => { setSelectedArtisan(a); setView('artisan-detail'); }}>
@@ -1579,37 +1587,37 @@ export default function App() {
               <div className="bg-emerald-600 p-1.5 rounded-lg">
                 <Hammer className="text-white w-5 h-5" />
               </div>
-              <span className="text-xl font-bold tracking-tight text-white">Artisan<span className="text-emerald-600">.tn</span></span>
+              <span className="text-xl font-bold tracking-tight text-white">تـوّا<span className="text-emerald-600">.تونس</span></span>
             </div>
-            <p className="text-sm">Empowering Tunisian artisans with technology and trust.</p>
+            <p className="text-sm">تمكين الحرفيين التونسيين بالتكنولوجيا والثقة.</p>
           </div>
           <div>
-            <h4 className="text-white font-bold mb-4 uppercase tracking-widest text-xs">Platform</h4>
+            <h4 className="text-white font-bold mb-4 uppercase tracking-widest text-xs">المنصة</h4>
             <ul className="space-y-2 text-sm">
-              <li><button className="hover:text-emerald-500">How it works</button></li>
-              <li><button className="hover:text-emerald-500">Verification Process</button></li>
-              <li><button className="hover:text-emerald-500">Smart Ranking</button></li>
+              <li><button className="hover:text-emerald-500">كيف نعمل</button></li>
+              <li><button className="hover:text-emerald-500">عملية التحقق</button></li>
+              <li><button className="hover:text-emerald-500">الترتيب الذكي</button></li>
             </ul>
           </div>
           <div>
-            <h4 className="text-white font-bold mb-4 uppercase tracking-widest text-xs">Legal</h4>
+            <h4 className="text-white font-bold mb-4 uppercase tracking-widest text-xs">قانوني</h4>
             <ul className="space-y-2 text-sm">
-              <li><button className="hover:text-emerald-500">Privacy Policy</button></li>
-              <li><button className="hover:text-emerald-500">Terms of Service</button></li>
-              <li><button className="hover:text-emerald-500">Cookie Policy</button></li>
+              <li><button className="hover:text-emerald-500">سياسة الخصوصية</button></li>
+              <li><button className="hover:text-emerald-500">شروط الخدمة</button></li>
+              <li><button className="hover:text-emerald-500">سياسة الكوكيز</button></li>
             </ul>
           </div>
           <div>
-            <h4 className="text-white font-bold mb-4 uppercase tracking-widest text-xs">Connect</h4>
+            <h4 className="text-white font-bold mb-4 uppercase tracking-widest text-xs">تواصل معنا</h4>
             <ul className="space-y-2 text-sm">
-              <li><button className="hover:text-emerald-500">Contact Us</button></li>
-              <li><button className="hover:text-emerald-500">Facebook</button></li>
-              <li><button className="hover:text-emerald-500">Instagram</button></li>
+              <li><button className="hover:text-emerald-500">اتصل بنا</button></li>
+              <li><button className="hover:text-emerald-500">فيسبوك</button></li>
+              <li><button className="hover:text-emerald-500">انستغرام</button></li>
             </ul>
           </div>
         </div>
         <div className="max-w-7xl mx-auto px-4 pt-12 mt-12 border-t border-stone-800 text-center text-xs">
-          © 2026 Artisan.tn. Built for Tunisia with ❤️
+          © 2026 تـوّا.تونس. صُنع في تونس بكل ❤️
         </div>
       </footer>
     </div>
