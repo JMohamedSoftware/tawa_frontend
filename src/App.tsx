@@ -305,7 +305,11 @@ export default function App() {
       localStorage.setItem('artisan_token', data.token);
       localStorage.setItem('artisan_user', JSON.stringify(data.user));
       setUser(data.user);
-      setView('otp-verification');
+      if (data.user.role === 'artisan') {
+        setView('artisan-dashboard');
+      } else {
+        setView('home');
+      }
     } catch (err: any) {
       setError(err.message);
     }
@@ -358,11 +362,7 @@ export default function App() {
         setView('home');
       }
     } catch (err: any) {
-      if (err.message === 'OTP_REQUIRED') {
-        setView('otp-verification');
-      } else {
-        setError(err.message);
-      }
+      setError(err.message);
     }
   };
 
