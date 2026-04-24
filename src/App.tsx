@@ -455,9 +455,8 @@ export default function App() {
 
   // ─── Handle Chat ───────────────────────────────────────────────────
   const openChat = async (target: { artisanProfileId: string, clientId: string, name: string }) => {
-    if (!user?.phone || !(user as any).age) {
-      alert("يرجى إكمال ملفك الشخصي (رقم الهاتف والعمر) لتتمكن من مراسلة الحرفيين.");
-      setView('client-profile');
+    if (!user) {
+      setView('login');
       return;
     }
     setChatArtisan(target);
@@ -930,6 +929,20 @@ export default function App() {
                     className="w-full bg-stone-900 text-white py-4 rounded-2xl font-bold border-b-4 border-black hover:bg-stone-800 transition-all flex items-center justify-center gap-2"
                   >
                     اطلب الخدمة الآن
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (!user) { setView('login'); return; }
+                      openChat({
+                        artisanProfileId: selectedArtisan.id,
+                        clientId: user.id,
+                        name: selectedArtisan.full_name
+                      });
+                    }}
+                    className="w-full bg-emerald-50 text-emerald-700 border border-emerald-200 py-4 rounded-2xl font-bold hover:bg-emerald-100 transition-all flex items-center justify-center gap-2"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    راسل الحرفي
                   </button>
                   <div className="px-4 py-3 bg-stone-50 rounded-xl border border-stone-200 flex items-center gap-3">
                     <div className={cn("w-2 h-2 rounded-full", selectedArtisan.is_online ? "bg-emerald-500 animate-pulse" : "bg-stone-300")} />
