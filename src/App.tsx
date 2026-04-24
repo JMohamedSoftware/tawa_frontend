@@ -305,6 +305,27 @@ export default function App() {
       localStorage.setItem('artisan_token', data.token);
       localStorage.setItem('artisan_user', JSON.stringify(data.user));
       setUser(data.user);
+      setView('otp-verification');
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
+
+  const [otpValue, setOtpValue] = useState('');
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    try {
+      const res = await fetch(API_BASE + '/api/auth/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: user?.email, otp: otpValue })
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      localStorage.setItem('artisan_token', data.token);
+      localStorage.setItem('artisan_user', JSON.stringify(data.user));
+      setUser(data.user);
       if (data.user.role === 'artisan') {
         setView('artisan-dashboard');
       } else {
@@ -337,7 +358,11 @@ export default function App() {
         setView('home');
       }
     } catch (err: any) {
-      setError(err.message);
+      if (err.message === 'OTP_REQUIRED') {
+        setView('otp-verification');
+      } else {
+        setError(err.message);
+      }
     }
   };
 
@@ -1484,6 +1509,41 @@ export default function App() {
               <p className="mt-6 text-center text-sm text-stone-500">
                 لديك حساب بالفعل؟ <button onClick={() => setView('login')} className="text-emerald-600 font-bold">تسجيل الدخول</button>
               </p>
+            </motion.div>
+          )}
+
+          {view === 'otp-verification' && (
+            <motion.div
+              key="otp-verification"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="max-w-md mx-auto bg-white p-8 rounded-3xl shadow-xl border border-stone-100 mt-12 text-center space-y-6"
+            >
+              <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto">
+                <ShieldCheck className="w-10 h-10 text-emerald-600" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-black text-stone-900">تأكيد رقم الـ WhatsApp</h2>
+                <p className="text-stone-500 text-sm mt-2">لقد أرسلنا رمزاً مكوناً من 6 أرقام إلى هاتفك <span className="font-bold text-stone-900" dir="ltr">{user?.phone}</span> عبر واتساب.</p>
+              </div>
+
+              {error && <div className="p-3 bg-rose-50 text-rose-600 text-sm rounded-xl border border-rose-100">{error}</div>}
+
+              <form onSubmit={handleVerifyOtp} className="space-y-6">
+                <input
+                  type="text"
+                  maxLength={6}
+                  placeholder="000 000"
+                  value={otpValue}
+                  onChange={(e) => setOtpValue(e.target.value)}
+                  className="w-full text-center text-4xl font-black tracking-[0.2em] p-4 bg-stone-50 border-2 border-stone-100 rounded-2xl outline-none focus:border-emerald-500 transition-all"
+                />
+                <button className="w-full bg-emerald-600 text-white py-4 rounded-xl font-bold hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-100">
+                  تأكيد الرمز والدخول
+                </button>
+              </form>
+              
+              <button onClick={() => setView('login')} className="text-xs font-bold text-stone-400 uppercase tracking-widest hover:text-stone-600">العودة لتسجيل الدخول</button>
             </motion.div>
           )}
 
