@@ -1477,10 +1477,32 @@ export default function App() {
                       <div className="w-2 h-2 bg-emerald-500 rounded-full animate-bounce" />
                     </div>
                   </div>
-                  {/* Mock artisan locations */}
-                  <div className="absolute top-1/4 left-1/3 w-3 h-3 bg-emerald-500 rounded-full shadow-lg shadow-emerald-200 cursor-pointer hover:scale-150 transition-transform" />
-                  <div className="absolute top-1/2 right-1/4 w-3 h-3 bg-emerald-500 rounded-full shadow-lg shadow-emerald-200 cursor-pointer hover:scale-150 transition-transform" />
-                  <div className="absolute bottom-1/3 left-1/2 w-3 h-3 bg-emerald-500 rounded-full shadow-lg shadow-emerald-200 cursor-pointer hover:scale-150 transition-transform" />
+                  {/* Dynamic artisan locations based on search results */}
+                  {artisans.map((a, i) => {
+                    // Simple relative positioning for the radar mockup
+                    const latDiff = (a as any).lat ? ((a as any).lat - (location?.lat || 36.8)) : (Math.random() - 0.5) * 0.4;
+                    const lngDiff = (a as any).lng ? ((a as any).lng - (location?.lng || 10.1)) : (Math.random() - 0.5) * 0.4;
+                    
+                    const top = 50 + (latDiff * 200); // Scale factor
+                    const left = 50 + (lngDiff * 200);
+                    
+                    return (
+                      <motion.div 
+                        key={i}
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ delay: i * 0.1 }}
+                        style={{ top: `${top}%`, left: `${left}%` }}
+                        className="absolute w-4 h-4 group cursor-pointer"
+                        onClick={() => { setSelectedArtisan(a); setView('artisan-detail'); }}
+                      >
+                        <div className="w-full h-full bg-emerald-500 rounded-full shadow-lg shadow-emerald-200 border-2 border-white animate-pulse" />
+                        <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 bg-stone-900 text-white text-[10px] px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20 pointer-events-none font-bold">
+                          {a.full_name}
+                        </div>
+                      </motion.div>
+                    );
+                  })}
                 </div>
                 
                 <div className="bg-white p-8 rounded-3xl border border-stone-100 shadow-sm space-y-6 overflow-y-auto max-h-[600px]">
