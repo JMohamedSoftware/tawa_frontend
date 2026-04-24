@@ -20,6 +20,8 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+const API_BASE = import.meta.env.VITE_API_URL || '';
+
 // --- Types ---
 interface Category {
   id: string;
@@ -106,13 +108,13 @@ export default function App() {
   useEffect(() => {
     if (user?.role === 'admin' && view === 'admin-dashboard') {
       if (adminTab === 'verifications') {
-        fetch('/api/admin/pending-artisans', {
+        fetch(API_BASE + '/api/admin/pending-artisans', {
           headers: { 'Authorization': `Bearer ${localStorage.getItem('artisan_token')}` }
         })
           .then(res => res.json())
           .then(data => setPendingArtisans(data));
       } else if (adminTab === 'accounts') {
-        fetch('/api/admin/users', {
+        fetch(API_BASE + '/api/admin/users', {
           headers: { 'Authorization': `Bearer ${localStorage.getItem('artisan_token')}` }
         })
           .then(res => res.json())
@@ -120,7 +122,7 @@ export default function App() {
       }
     }
     if (user?.role === 'artisan' && view === 'artisan-dashboard') {
-      fetch('/api/artisan/me', {
+      fetch(API_BASE + '/api/artisan/me', {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('artisan_token')}` }
       })
         .then(res => res.json())
@@ -129,7 +131,7 @@ export default function App() {
           if (data?.id) fetchPhotos(data.id);
         });
 
-      fetch('/api/requests/artisan', {
+      fetch(API_BASE + '/api/requests/artisan', {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('artisan_token')}` }
       })
         .then(res => res.json())
@@ -137,7 +139,7 @@ export default function App() {
     }
 
     if (user?.role === 'client' && view === 'client-dashboard') {
-      fetch('/api/requests/client', {
+      fetch(API_BASE + '/api/requests/client', {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('artisan_token')}` }
       })
         .then(res => res.json())
@@ -159,7 +161,7 @@ export default function App() {
       addNotification(`🔔 New Service Request: ${data.description}`);
       // Refresh artisan requests
       if (user?.role === 'artisan') {
-        fetch('/api/requests/artisan', {
+        fetch(API_BASE + '/api/requests/artisan', {
           headers: { 'Authorization': `Bearer ${localStorage.getItem('artisan_token')}` }
         })
           .then(res => res.json())
@@ -199,7 +201,7 @@ export default function App() {
   };
 
   const fetchPhotos = (artisanId: string) => {
-    fetch(`/api/artisans/${artisanId}/photos`)
+    fetch(API_BASE + `/api/artisans/${artisanId}/photos`)
       .then(res => res.json())
       .then(data => setArtisanPhotos(data));
   };
@@ -213,7 +215,7 @@ export default function App() {
     formData.append('description', 'Portfolio work');
 
     try {
-      const res = await fetch('/api/artisan/photos', {
+      const res = await fetch(API_BASE + '/api/artisan/photos', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${localStorage.getItem('artisan_token')}` },
         body: formData
@@ -228,7 +230,7 @@ export default function App() {
 
   const handleVerify = async (artisanId: string, status: 'approved' | 'rejected') => {
     try {
-      await fetch('/api/admin/verify', {
+      await fetch(API_BASE + '/api/admin/verify', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -245,7 +247,7 @@ export default function App() {
   const handleDeleteUser = async (userId: string) => {
     if (!window.confirm("Are you sure you want to completely delete this user and all associated data?")) return;
     try {
-      await fetch(`/api/admin/users/${userId}`, {
+      await fetch(API_BASE + `/api/admin/users/${userId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('artisan_token')}`
@@ -266,7 +268,7 @@ export default function App() {
     formData.append('doc_type', docType);
 
     try {
-      const res = await fetch('/api/artisan/documents', {
+      const res = await fetch(API_BASE + '/api/artisan/documents', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${localStorage.getItem('artisan_token')}` },
         body: formData
@@ -290,7 +292,7 @@ export default function App() {
     e.preventDefault();
     setError(null);
     try {
-      const res = await fetch('/api/auth/register', {
+      const res = await fetch(API_BASE + '/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(regData)
@@ -310,7 +312,7 @@ export default function App() {
     e.preventDefault();
     setError(null);
     try {
-      const res = await fetch('/api/auth/login', {
+      const res = await fetch(API_BASE + '/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(loginData)
@@ -327,7 +329,7 @@ export default function App() {
   };
 
   const fetchCategories = async () => {
-    const res = await fetch('/api/categories');
+    const res = await fetch(API_BASE + '/api/categories');
     const data = await res.json();
     setCategories(data);
   };
@@ -337,7 +339,7 @@ export default function App() {
     const lat = location?.lat || 36.8065; // Tunis default
     const lng = location?.lng || 10.1815;
     const slug = catSlug || selectedCategory || '';
-    const res = await fetch(`/api/artisans/search?categorySlug=${slug}&lat=${lat}&lng=${lng}`);
+    const res = await fetch(API_BASE + `/api/artisans/search?categorySlug=${slug}&lat=${lat}&lng=${lng}`);
     let data = await res.json();
     
     // Default sorting can be done here or in a separate function
@@ -370,7 +372,7 @@ export default function App() {
 
   const handleUpdateRequestStatus = async (requestId: number, status: string) => {
     try {
-      const res = await fetch(`/api/requests/${requestId}`, {
+      const res = await fetch(API_BASE + `/api/requests/${requestId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -380,7 +382,7 @@ export default function App() {
       });
       if (res.ok) {
         if (user?.role === 'artisan') {
-          fetch('/api/requests/artisan', {
+          fetch(API_BASE + '/api/requests/artisan', {
             headers: { 'Authorization': `Bearer ${localStorage.getItem('artisan_token')}` }
           })
             .then(res => res.json())
@@ -402,7 +404,7 @@ export default function App() {
   const handleRateRequest = async () => {
     if (!ratingRequest) return;
     try {
-      await fetch(`/api/requests/${ratingRequest.id}/rate`, {
+      await fetch(API_BASE + `/api/requests/${ratingRequest.id}/rate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('artisan_token')}` },
         body: JSON.stringify({ rating: ratingValue, review: ratingReview })
@@ -420,7 +422,7 @@ export default function App() {
     setChatArtisan(target);
     setView('chat');
     try {
-      const res = await fetch(`/api/chat/${target.artisanProfileId}/${target.clientId}`, {
+      const res = await fetch(API_BASE + `/api/chat/${target.artisanProfileId}/${target.clientId}`, {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('artisan_token')}` }
       });
       const data = await res.json();
@@ -434,7 +436,7 @@ export default function App() {
     const msg = chatInput;
     setChatInput('');
     try {
-      await fetch(`/api/chat/${chatArtisan.artisanProfileId}/${chatArtisan.clientId}`, {
+      await fetch(API_BASE + `/api/chat/${chatArtisan.artisanProfileId}/${chatArtisan.clientId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('artisan_token')}` },
         body: JSON.stringify({ message: msg })
@@ -447,7 +449,7 @@ export default function App() {
   const handleSaveProfile = async () => {
     setProfileMsg(null);
     try {
-      const res = await fetch('/api/client/profile', {
+      const res = await fetch(API_BASE + '/api/client/profile', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('artisan_token')}` },
         body: JSON.stringify(profileForm)
@@ -557,7 +559,7 @@ export default function App() {
                 onClick={async () => {
                   setLoading(true);
                   try {
-                    const res = await fetch('/api/requests', {
+                    const res = await fetch(API_BASE + '/api/requests', {
                       method: 'POST',
                       headers: {
                         'Content-Type': 'application/json',
@@ -864,7 +866,7 @@ export default function App() {
                       artisan={artisan}
                       onClick={() => {
                         setSelectedArtisan(artisan);
-                        fetch(`/api/artisans/${artisan.id}/photos`)
+                        fetch(API_BASE + `/api/artisans/${artisan.id}/photos`)
                           .then(res => res.json())
                           .then(data => setSelectedArtisanPhotos(data));
                         setView('artisan-detail');
@@ -1305,7 +1307,7 @@ export default function App() {
 
                     <button
                       onClick={async () => {
-                        await fetch('/api/artisan/profile', {
+                        await fetch(API_BASE + '/api/artisan/profile', {
                           method: 'PUT',
                           headers: {
                             'Content-Type': 'application/json',
