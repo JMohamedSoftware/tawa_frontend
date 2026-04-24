@@ -372,18 +372,16 @@ export default function App() {
     setCategories(data);
   };
 
-  const handleSearch = async (catSlug?: string) => {
+  const handleSearch = async (catSlug?: string, navigateToResults = true) => {
     setLoading(true);
     const lat = location?.lat || 36.8065; // Tunis default
     const lng = location?.lng || 10.1815;
-    const slug = catSlug || selectedCategory || '';
+    const slug = catSlug !== undefined ? catSlug : (selectedCategory || '');
     const res = await fetch(API_BASE + `/api/artisans/search?categorySlug=${slug}&lat=${lat}&lng=${lng}`);
     let data = await res.json();
-    
-    // Default sorting can be done here or in a separate function
     setArtisans(data);
     setLoading(false);
-    setView('search-results');
+    if (navigateToResults) setView('search-results');
   };
 
   const sortedArtisans = [...artisans].sort((a, b) => {
@@ -753,11 +751,103 @@ export default function App() {
                       category={cat}
                       active={selectedCategory === cat.slug}
                       onClick={() => {
-                        setSelectedCategory(cat.slug);
-                        handleSearch(cat.slug);
+                        const newSlug = selectedCategory === cat.slug ? '' : cat.slug;
+                        setSelectedCategory(newSlug || null);
+                        handleSearch(newSlug, false);
                       }}
                     />
                   ))}
+                </div>
+              </section>
+
+              {/* Artisan Cards directly on Home */}
+              {artisans.length > 0 && (
+                <section className="space-y-6">
+                  <div className="flex justify-between items-end">
+                    <h2 className="text-2xl font-bold tracking-tight">
+                      {selectedCategory ? `حرفيون في ${categories.find(c => c.slug === selectedCategory)?.name}` : 'حرفيون قريبون منك'}
+                    </h2>
+                    <button
+                      onClick={() => setView('search-results')}
+                      className="text-sm font-bold text-emerald-600 uppercase tracking-widest hover:text-emerald-700 transition-colors"
+                    >
+                      عرض الكل →
+                    </button>
+                  </div>
+                  {loading ? (
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {[1,2,3].map(i => <div key={i} className="h-48 bg-stone-200 animate-pulse rounded-2xl" />)}
+                    </div>
+                  ) : (
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {artisans.slice(0, 6).map(artisan => (
+                        <ArtisanCard
+                          key={artisan.id}
+                          artisan={artisan}
+                          onClick={() => {
+                            setSelectedArtisan(artisan);
+                            fetch(API_BASE + `/api/artisans/${artisan.id}/photos`)
+                              .then(res => res.json())
+                              .then(data => setSelectedArtisanPhotos(data));
+                            setView('artisan-detail');
+                          }}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </section>
+              )}
+
+              {/* Inline Map / Radar Section */}
+              <section className="space-y-6">
+                <div className="flex justify-between items-end">
+                  <h2 className="text-2xl font-bold tracking-tight">رادار الحرفيين 🗺️</h2>
+                  <button
+                    onClick={() => setView('map')}
+                    className="text-sm font-bold text-emerald-600 uppercase tracking-widest hover:text-emerald-700 transition-colors"
+                  >
+                    فتح الخريطة الكاملة →
+                  </button>
+                </div>
+                <div className="bg-stone-900 rounded-3xl h-72 relative overflow-hidden flex items-center justify-center">
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,#05966d22_0%,transparent_70%)]" />
+                  <div className="absolute inset-0 bg-[radial-gradient(#05966d_1px,transparent_1px)] [background-size:30px_30px] opacity-10" />
+                  {artisans.length > 0 ? artisans.slice(0, 10).map((a, i) => {
+                    const top = 15 + (i % 5) * 15;
+                    const left = 10 + (i % 5) * 18 + (i > 4 ? 8 : 0);
+                    return (
+                      <motion.div
+                        key={a.id}
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ delay: i * 0.1 }}
+                        style={{ top: `${top}%`, left: `${left}%` }}
+                        className="absolute w-5 h-5 group cursor-pointer"
+                        onClick={() => { setSelectedArtisan(a); setView('artisan-detail'); }}
+                      >
+                        <div className="w-full h-full rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/50 animate-pulse border-2 border-white" />
+                        <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 bg-white text-stone-900 text-[9px] px-2 py-0.5 rounded-md whitespace-nowrap font-bold opacity-0 group-hover:opacity-100 transition-opacity shadow-xl z-10">
+                          {a.full_name}
+                        </div>
+                      </motion.div>
+                    );
+                  }) : (
+                    <div className="text-center space-y-3 z-10">
+                      <MapPin className="w-10 h-10 text-emerald-500 mx-auto" />
+                      <p className="text-stone-400 text-sm font-bold">ابحث أولاً لرؤية الحرفيين على الرادار</p>
+                      <button
+                        onClick={() => handleSearch(undefined, false)}
+                        className="bg-emerald-600 text-white text-xs px-6 py-2 rounded-full font-bold hover:bg-emerald-700 transition-colors"
+                      >
+                        تحميل الحرفيين القريبين
+                      </button>
+                    </div>
+                  )}
+                  {artisans.length > 0 && (
+                    <div className="absolute bottom-4 left-4 bg-black/50 backdrop-blur-sm text-white text-xs px-3 py-1.5 rounded-full font-bold">
+                      {artisans.length} حرفي نشط في منطقتك
+                    </div>
+                  )}
                 </div>
               </section>
 
