@@ -753,6 +753,27 @@ export default function App() {
                 </div>
               </section>
 
+              {/* Hero Image */}
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="relative rounded-3xl overflow-hidden shadow-2xl"
+              >
+                <img
+                  src="/hero.jpg"
+                  alt="حرفيون تونسيون محترفون - تـوّا"
+                  className="w-full object-cover"
+                  style={{ maxHeight: '480px' }}
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-stone-900/60 via-transparent to-transparent" />
+                <div className="absolute bottom-6 right-6 text-right">
+                  <p className="text-white font-black text-2xl drop-shadow-lg">حرفيون موثقون</p>
+                  <p className="text-emerald-300 text-sm font-bold">جاهزون لخدمتك في أي وقت</p>
+                </div>
+              </motion.div>
+
               <section className="space-y-6">
                 <div className="flex justify-between items-end">
                   <h2 className="text-2xl font-bold tracking-tight">الفئات الشائعة</h2>
