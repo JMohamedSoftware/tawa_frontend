@@ -74,7 +74,7 @@ export default function App() {
   const [location, setLocation] = useState<{ lat: number, lng: number } | null>(null);
   const [activeRadarId, setActiveRadarId] = useState<string | null>(null);
 
-  const [regData, setRegData] = useState({ fullName: '', email: '', password: '', role: 'client' });
+  const [regData, setRegData] = useState({ fullName: '', email: '', password: '', phone: '', role: 'client' });
   const [loginData, setLoginData] = useState({ email: '', password: '' });
   const [error, setError] = useState<string | null>(null);
 
@@ -229,7 +229,7 @@ export default function App() {
     }
   };
 
-  const handleVerify = async (artisanId: string, status: 'approved' | 'rejected') => {
+  const handleVerify = async (artisanId: string, status: 'approved' | 'rejected', contractSigned = false) => {
     try {
       await fetch(API_BASE + '/api/admin/verify', {
         method: 'POST',
@@ -237,7 +237,7 @@ export default function App() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('artisan_token')}`
         },
-        body: JSON.stringify({ artisanId, status })
+        body: JSON.stringify({ artisanId, status, contractSigned })
       });
       setPendingArtisans(prev => prev.filter(a => a.id !== artisanId));
     } catch (err) {
@@ -1020,8 +1020,8 @@ export default function App() {
                     <table className="w-full text-right" dir="rtl">
                       <thead className="bg-stone-50 border-b border-stone-200">
                         <tr>
-                          <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-stone-400 text-right">الحرفي</th>
-                          <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-stone-400 text-right">الفئة</th>
+                          <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-stone-400 text-right">الحرفي / الهاتف</th>
+                          <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-stone-400 text-right">الفئة / الوثائق</th>
                           <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-stone-400 text-right">الحالة</th>
                           <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-stone-400 text-right">الإجراءات</th>
                         </tr>
@@ -1032,16 +1032,40 @@ export default function App() {
                             <td className="px-6 py-4">
                               <div className="font-bold text-stone-900">{item.full_name}</div>
                               <div className="text-xs text-stone-500">{item.email}</div>
+                              <div className="text-xs font-bold text-emerald-600 mt-1">{item.phone || "بدون هاتف"}</div>
                             </td>
-                            <td className="px-6 py-4 text-sm text-stone-600">{item.category_id || 'غير محدد'}</td>
                             <td className="px-6 py-4">
-                              <div className="flex gap-2">
-                                <span className="text-[10px] bg-stone-100 px-2 py-1 rounded border border-stone-200 text-stone-600">في انتظار المراجعة</span>
+                              <div className="text-sm text-stone-600 mb-2">{item.category_name || 'غير محدد'}</div>
+                              <div className="flex flex-wrap gap-2">
+                                {item.documents && item.documents.map((d: any, di: number) => (
+                                  <a key={di} href={API_BASE + d.file_path} target="_blank" className="text-[9px] bg-stone-100 px-2 py-1 rounded border border-stone-200 text-stone-500 hover:bg-emerald-50 hover:text-emerald-600 transition-colors">
+                                    معاينة {d.doc_type === 'cin' ? 'البطاقة' : 'الوثيقة'}
+                                  </a>
+                                ))}
                               </div>
                             </td>
                             <td className="px-6 py-4">
-                              <div className="flex gap-2">
-                                <button onClick={() => handleVerify(item.id, 'approved')} className="bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-emerald-700 transition-colors">قبول</button>
+                              <div className="flex flex-col gap-1">
+                                <span className="text-[10px] bg-stone-100 px-2 py-1 rounded border border-stone-200 text-stone-600 text-center">في انتظار المراجعة</span>
+                                {item.contract_signed ? (
+                                  <span className="text-[9px] text-emerald-600 font-bold">✓ تم توقيع العقد</span>
+                                ) : (
+                                  <span className="text-[9px] text-rose-400 font-bold">⚠ العقد غير موقع</span>
+                                )}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="flex flex-col gap-2">
+                                <button 
+                                  onClick={() => {
+                                    if(window.confirm("هل تأكدت من الوثائق وتوقيع العقد مع الحرفي؟")) {
+                                      handleVerify(item.id, 'approved', true);
+                                    }
+                                  }} 
+                                  className="bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-50"
+                                >
+                                  تفعيل الحساب (بعد العقد)
+                                </button>
                                 <button onClick={() => handleVerify(item.id, 'rejected')} className="bg-rose-50 text-rose-600 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-rose-100 transition-colors">رفض</button>
                               </div>
                             </td>
@@ -1369,6 +1393,17 @@ export default function App() {
                     required
                     value={regData.email}
                     onChange={(e) => setRegData({ ...regData, email: e.target.value })}
+                    className="w-full p-3 bg-stone-50 border border-stone-200 rounded-xl focus:border-emerald-500 outline-none text-right"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold uppercase tracking-widest text-stone-400">رقم الهاتف</label>
+                  <input
+                    type="tel"
+                    required
+                    placeholder="مثال: 000 000 21"
+                    value={regData.phone}
+                    onChange={(e) => setRegData({ ...regData, phone: e.target.value })}
                     className="w-full p-3 bg-stone-50 border border-stone-200 rounded-xl focus:border-emerald-500 outline-none text-right"
                   />
                 </div>
