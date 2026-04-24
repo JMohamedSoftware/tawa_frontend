@@ -661,7 +661,7 @@ export default function App() {
                       },
                       body: JSON.stringify({
                         artisanId: bookingArtisan.id,
-                        categoryId: bookingArtisan.category_id,
+                        categoryId: typeof bookingArtisan.category_id === 'object' ? (bookingArtisan.category_id as any).id : bookingArtisan.category_id,
                         description: bookingDesc,
                         lat: location?.lat || 36.8,
                         lng: location?.lng || 10.1,
