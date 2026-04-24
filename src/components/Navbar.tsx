@@ -40,9 +40,12 @@ export const Navbar = ({ user, onLogout, onNavigate }: { user: User | null, onLo
                         
                         <div className="h-4 w-px bg-stone-200 hidden sm:block" />
                         
-                        <button onClick={() => onNavigate(user.role === 'client' ? 'client-profile' : 'home')} className="flex items-center gap-2 group">
-                            <div className="w-8 h-8 bg-stone-100 rounded-lg flex items-center justify-center group-hover:bg-emerald-50 transition-colors">
-                                <UserIcon className="w-4 h-4 text-stone-500 group-hover:text-emerald-600" />
+                        <button 
+                            onClick={() => onNavigate(user.role === 'artisan' ? 'artisan-dashboard' : user.role === 'admin' ? 'admin-dashboard' : 'client-dashboard')} 
+                            className="flex items-center gap-2 group"
+                        >
+                            <div className="w-8 h-8 bg-stone-100 rounded-lg flex items-center justify-center font-black text-sm text-stone-600 group-hover:bg-emerald-600 group-hover:text-white transition-colors uppercase">
+                                {(user?.fullName || '?').charAt(0)}
                             </div>
                         </button>
 
