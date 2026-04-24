@@ -73,6 +73,8 @@ export default function App() {
   const [sortBy, setSortBy] = useState<'smart' | 'distance' | 'rating'>('smart');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [artisans, setArtisans] = useState<Artisan[]>([]);
+  const [artisanPage, setArtisanPage] = useState(0);
+  const ARTISANS_PER_PAGE = 10;
   const [loading, setLoading] = useState(false);
   const [location, setLocation] = useState<{ lat: number, lng: number } | null>(null);
   const [activeRadarId, setActiveRadarId] = useState<string | null>(null);
@@ -285,11 +287,13 @@ export default function App() {
     }
   };
 
-  // Auth state
+  // Auth state + auto-load artisans on mount
   useEffect(() => {
     const saved = localStorage.getItem('artisan_user');
     if (saved) setUser(JSON.parse(saved));
     fetchCategories();
+    // Auto-load nearby artisans
+    handleSearch(undefined, false);
   }, []);
 
   const handleRegister = async (e: React.FormEvent) => {
@@ -778,12 +782,15 @@ export default function App() {
                 </div>
               </section>
 
-              {/* Artisan Cards directly on Home */}
+              {/* Artisan Cards with Pagination */}
               {artisans.length > 0 && (
                 <section className="space-y-6">
                   <div className="flex justify-between items-end">
                     <h2 className="text-2xl font-bold tracking-tight">
-                      {selectedCategory ? `حرفيون في ${categories.find(c => c.slug === selectedCategory)?.name}` : 'حرفيون قريبون منك'}
+                      {selectedCategory
+                        ? `حرفيون في ${categories.find(c => c.slug === selectedCategory)?.name}`
+                        : 'حرفيون قريبون منك'}
+                      <span className="text-sm font-normal text-stone-400 mr-2">({artisans.length} نتيجة)</span>
                     </h2>
                     <button
                       onClick={() => setView('search-results')}
@@ -792,32 +799,60 @@ export default function App() {
                       عرض الكل →
                     </button>
                   </div>
+
                   {loading ? (
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                       {[1,2,3].map(i => <div key={i} className="h-48 bg-stone-200 animate-pulse rounded-2xl" />)}
                     </div>
                   ) : (
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {artisans.slice(0, 6).map(artisan => (
-                        <ArtisanCard
-                          key={artisan.id}
-                          artisan={artisan}
-                          onClick={() => {
-                            setSelectedArtisan(artisan);
-                            fetch(API_BASE + `/api/artisans/${artisan.id}/photos`)
-                              .then(res => res.json())
-                              .then(data => setSelectedArtisanPhotos(data));
-                            setView('artisan-detail');
-                          }}
-                        />
-                      ))}
-                    </div>
+                    <>
+                      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {artisans
+                          .slice(artisanPage * ARTISANS_PER_PAGE, (artisanPage + 1) * ARTISANS_PER_PAGE)
+                          .map(artisan => (
+                            <ArtisanCard
+                              key={artisan.id}
+                              artisan={artisan}
+                              onClick={() => {
+                                setSelectedArtisan(artisan);
+                                fetch(API_BASE + `/api/artisans/${artisan.id}/photos`)
+                                  .then(res => res.json())
+                                  .then(data => setSelectedArtisanPhotos(data));
+                                setView('artisan-detail');
+                              }}
+                            />
+                          ))}
+                      </div>
+
+                      {/* Pagination Controls */}
+                      {artisans.length > ARTISANS_PER_PAGE && (
+                        <div className="flex items-center justify-center gap-4 pt-4">
+                          <button
+                            onClick={() => setArtisanPage(p => Math.max(0, p - 1))}
+                            disabled={artisanPage === 0}
+                            className="px-5 py-2 bg-white border border-stone-200 rounded-xl text-sm font-bold hover:bg-stone-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                          >
+                            ← السابق
+                          </button>
+                          <span className="text-sm font-bold text-stone-500">
+                            صفحة {artisanPage + 1} من {Math.ceil(artisans.length / ARTISANS_PER_PAGE)}
+                          </span>
+                          <button
+                            onClick={() => setArtisanPage(p => Math.min(Math.ceil(artisans.length / ARTISANS_PER_PAGE) - 1, p + 1))}
+                            disabled={(artisanPage + 1) * ARTISANS_PER_PAGE >= artisans.length}
+                            className="px-5 py-2 bg-stone-900 text-white rounded-xl text-sm font-bold hover:bg-stone-800 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                          >
+                            التالي →
+                          </button>
+                        </div>
+                      )}
+                    </>
                   )}
                 </section>
               )}
 
               {/* Inline Map / Radar Section */}
-              <section className="space-y-6">
+              <section className="space-y-4">
                 <div className="flex justify-between items-end">
                   <h2 className="text-2xl font-bold tracking-tight">رادار الحرفيين 🗺️</h2>
                   <button
@@ -827,23 +862,19 @@ export default function App() {
                     فتح الخريطة الكاملة →
                   </button>
                 </div>
-                <div className="bg-stone-900 rounded-3xl h-72 relative overflow-hidden flex items-center justify-center">
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,#05966d22_0%,transparent_70%)]" />
-                  <div className="absolute inset-0 bg-[radial-gradient(#05966d_1px,transparent_1px)] [background-size:30px_30px] opacity-10" />
-                  {/* Real Leaflet Map */}
-                  <div style={{ height: '288px' }}>
-                    <ArtisanMap
-                      artisans={artisans}
-                      userLocation={location}
-                      onArtisanClick={(a) => {
-                        setSelectedArtisan(a as any);
-                        fetch(API_BASE + `/api/artisans/${a.id}/photos`)
-                          .then(res => res.json())
-                          .then(data => setSelectedArtisanPhotos(data));
-                        setView('artisan-detail');
-                      }}
-                    />
-                  </div>
+                {/* Real Leaflet Map - clean white container */}
+                <div className="rounded-3xl overflow-hidden border border-stone-200 shadow-sm" style={{ height: '320px' }}>
+                  <ArtisanMap
+                    artisans={artisans}
+                    userLocation={location}
+                    onArtisanClick={(a) => {
+                      setSelectedArtisan(a as any);
+                      fetch(API_BASE + `/api/artisans/${a.id}/photos`)
+                        .then(res => res.json())
+                        .then(data => setSelectedArtisanPhotos(data));
+                      setView('artisan-detail');
+                    }}
+                  />
                 </div>
               </section>
 
