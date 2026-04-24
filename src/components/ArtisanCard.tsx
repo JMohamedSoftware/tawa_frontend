@@ -34,10 +34,10 @@ export const ArtisanCard = ({ artisan, onClick }: { artisan: Artisan, onClick: (
         <div className="flex justify-between items-start mb-4">
             <div className="flex items-center gap-3">
                 <div className="w-12 h-12 bg-stone-100 rounded-full flex items-center justify-center text-stone-400 font-bold text-xl uppercase">
-                    {artisan.full_name.charAt(0)}
+                    {(artisan.full_name || '?').charAt(0)}
                 </div>
                 <div>
-                    <h3 className="font-bold text-stone-900 group-hover:text-emerald-600 transition-colors">{artisan.full_name}</h3>
+                    <h3 className="font-bold text-stone-900 group-hover:text-emerald-600 transition-colors">{artisan.full_name || 'حرفي'}</h3>
                     <p className="text-xs text-stone-500 font-medium uppercase tracking-tighter">{artisan.category_name}</p>
                 </div>
             </div>

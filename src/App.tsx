@@ -606,9 +606,9 @@ export default function App() {
               </div>
 
               <div className="flex items-center gap-4 p-4 bg-stone-50 rounded-2xl border border-stone-200">
-                <div className="w-12 h-12 bg-stone-200 rounded-xl flex items-center justify-center font-black">{bookingArtisan.full_name.charAt(0)}</div>
+                <div className="w-12 h-12 bg-stone-200 rounded-xl flex items-center justify-center font-black">{(bookingArtisan?.full_name || '?').charAt(0)}</div>
                 <div>
-                  <p className="font-bold">{bookingArtisan.full_name}</p>
+                  <p className="font-bold">{bookingArtisan?.full_name || 'حرفي'}</p>
                   <p className="text-xs text-stone-500 uppercase font-bold">{bookingArtisan.category_name}</p>
                 </div>
               </div>
@@ -1008,7 +1008,7 @@ export default function App() {
 
               <div className="bg-white rounded-3xl border border-stone-100 p-8 shadow-sm flex flex-col md:flex-row gap-8 text-right" dir="rtl">
                 <div className="w-24 h-24 bg-stone-100 rounded-2xl flex items-center justify-center text-stone-300 text-4xl font-black">
-                  {selectedArtisan.full_name.charAt(0)}
+                  {(selectedArtisan?.full_name || '?').charAt(0)}
                 </div>
                 <div className="flex-1 space-y-4">
                   <div>
@@ -1932,9 +1932,9 @@ export default function App() {
                   <div className="space-y-4">
                     {artisans.length > 0 ? artisans.map((a, i) => (
                       <div key={i} className="p-4 bg-stone-50 rounded-2xl border border-stone-200 flex items-center gap-4 group cursor-pointer hover:border-emerald-200 hover:bg-emerald-50/50 transition-all" onClick={() => { setSelectedArtisan(a); setView('artisan-detail'); }}>
-                        <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center font-black text-emerald-600 border border-stone-100 shadow-sm group-hover:bg-emerald-600 group-hover:text-white transition-colors">{a.full_name.charAt(0)}</div>
+                        <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center font-black text-emerald-600 border border-stone-100 shadow-sm group-hover:bg-emerald-600 group-hover:text-white transition-colors">{(a.full_name || '?').charAt(0)}</div>
                         <div>
-                          <p className="font-bold text-sm text-stone-900">{a.full_name}</p>
+                          <p className="font-bold text-sm text-stone-900">{a.full_name || 'حرفي'}</p>
                           <p className="text-[10px] text-stone-400 font-bold uppercase">{a.category_name} • {a.distance_km} كم</p>
                         </div>
                       </div>
@@ -1990,10 +1990,10 @@ export default function App() {
               <div className="bg-white p-8 rounded-3xl border border-stone-100 shadow-xl space-y-8 text-right" dir="rtl">
                 <div className="flex items-center gap-6 justify-start">
                   <div className="w-20 h-20 bg-stone-100 rounded-3xl flex items-center justify-center font-black text-3xl text-stone-300 border-2 border-stone-50">
-                    {user?.fullName?.charAt(0)}
+                    {(user?.fullName || '?').charAt(0)}
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-stone-900">{user?.fullName}</h3>
+                    <h3 className="text-xl font-bold text-stone-900">{user?.fullName || 'مستخدم'}</h3>
                     <p className="text-stone-400 font-medium">{user?.email}</p>
                     <span className="inline-block mt-1 bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase px-2 py-0.5 rounded-full">عميل موثق</span>
                   </div>
