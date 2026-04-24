@@ -72,6 +72,7 @@ export default function App() {
   const [artisans, setArtisans] = useState<Artisan[]>([]);
   const [loading, setLoading] = useState(false);
   const [location, setLocation] = useState<{ lat: number, lng: number } | null>(null);
+  const [activeRadarId, setActiveRadarId] = useState<string | null>(null);
 
   const [regData, setRegData] = useState({ fullName: '', email: '', password: '', role: 'client' });
   const [loginData, setLoginData] = useState({ email: '', password: '' });
@@ -1494,11 +1495,25 @@ export default function App() {
                         transition={{ delay: i * 0.1 }}
                         style={{ top: `${top}%`, left: `${left}%` }}
                         className="absolute w-4 h-4 group cursor-pointer"
-                        onClick={() => { setSelectedArtisan(a); setView('artisan-detail'); }}
+                        onClick={(e) => { 
+                          e.stopPropagation();
+                          if (activeRadarId === a.id) {
+                            setSelectedArtisan(a); 
+                            setView('artisan-detail'); 
+                          } else {
+                            setActiveRadarId(a.id);
+                          }
+                        }}
                       >
-                        <div className="w-full h-full bg-emerald-500 rounded-full shadow-lg shadow-emerald-200 border-2 border-white animate-pulse" />
-                        <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 bg-stone-900 text-white text-[10px] px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20 pointer-events-none font-bold">
-                          {a.full_name}
+                        <div className={cn(
+                          "w-full h-full rounded-full shadow-lg border-2 border-white transition-all",
+                          activeRadarId === a.id ? "bg-stone-900 scale-125 z-30" : "bg-emerald-500 animate-pulse shadow-emerald-200"
+                        )} />
+                        <div className={cn(
+                          "absolute top-full left-1/2 -translate-x-1/2 mt-1 bg-stone-900 text-white text-[10px] px-2 py-1 rounded-md transition-all whitespace-nowrap z-20 pointer-events-none font-bold shadow-xl",
+                          activeRadarId === a.id ? "opacity-100 translate-y-0" : "opacity-0 translate-y-1"
+                        )}>
+                          {a.full_name} (اضغط مرة أخرى للتفاصيل)
                         </div>
                       </motion.div>
                     );
