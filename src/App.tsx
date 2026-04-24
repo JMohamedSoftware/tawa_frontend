@@ -65,6 +65,7 @@ export default function App() {
   // Admin Data
   const [adminTab, setAdminTab] = useState<'verifications' | 'accounts'>('verifications');
   const [allUsers, setAllUsers] = useState<User[]>([]);
+  const [sortBy, setSortBy] = useState<'smart' | 'distance' | 'rating'>('smart');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [artisans, setArtisans] = useState<Artisan[]>([]);
   const [loading, setLoading] = useState(false);
@@ -337,11 +338,20 @@ export default function App() {
     const lng = location?.lng || 10.1815;
     const slug = catSlug || selectedCategory || '';
     const res = await fetch(`/api/artisans/search?categorySlug=${slug}&lat=${lat}&lng=${lng}`);
-    const data = await res.json();
+    let data = await res.json();
+    
+    // Default sorting can be done here or in a separate function
     setArtisans(data);
     setLoading(false);
     setView('search-results');
   };
+
+  const sortedArtisans = [...artisans].sort((a, b) => {
+    if (sortBy === 'rating') return b.avg_rating - a.avg_rating;
+    if (sortBy === 'distance') return parseFloat(a.distance_km) - parseFloat(b.distance_km);
+    // Smart score is default
+    return b.smart_score - a.smart_score;
+  });
 
   const handleLogout = () => {
     localStorage.removeItem('artisan_token');
@@ -819,9 +829,24 @@ export default function App() {
                   </h2>
                 </div>
                 <div className="flex gap-2 bg-white p-1 rounded-xl border border-stone-200">
-                  <button className="px-4 py-2 text-xs font-bold bg-stone-900 text-white rounded-lg">الترتيب الذكي</button>
-                  <button className="px-4 py-2 text-xs font-bold text-stone-500 hover:bg-stone-50 rounded-lg">المسافة</button>
-                  <button className="px-4 py-2 text-xs font-bold text-stone-500 hover:bg-stone-50 rounded-lg">التقييم</button>
+                  <button 
+                    onClick={() => setSortBy('smart')}
+                    className={cn("px-4 py-2 text-xs font-bold rounded-lg transition-all", sortBy === 'smart' ? "bg-stone-900 text-white" : "text-stone-500 hover:bg-stone-50")}
+                  >
+                    الترتيب الذكي
+                  </button>
+                  <button 
+                    onClick={() => setSortBy('distance')}
+                    className={cn("px-4 py-2 text-xs font-bold rounded-lg transition-all", sortBy === 'distance' ? "bg-stone-900 text-white" : "text-stone-500 hover:bg-stone-50")}
+                  >
+                    المسافة
+                  </button>
+                  <button 
+                    onClick={() => setSortBy('rating')}
+                    className={cn("px-4 py-2 text-xs font-bold rounded-lg transition-all", sortBy === 'rating' ? "bg-stone-900 text-white" : "text-stone-500 hover:bg-stone-50")}
+                  >
+                    التقييم
+                  </button>
                 </div>
               </div>
 
@@ -833,7 +858,7 @@ export default function App() {
                 </div>
               ) : artisans.length > 0 ? (
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {artisans.map(artisan => (
+                  {sortedArtisans.map(artisan => (
                     <ArtisanCard
                       key={artisan.id}
                       artisan={artisan}
