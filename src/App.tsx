@@ -51,6 +51,8 @@ interface User {
   email: string;
   fullName: string;
   role: 'client' | 'artisan' | 'admin';
+  phone?: string;
+  age?: number;
 }
 
 // Components moved to separate files
@@ -102,7 +104,7 @@ export default function App() {
   const [notifHistory, setNotifHistory] = useState<any[]>([]);
 
   // Profile edit state
-  const [profileForm, setProfileForm] = useState({ fullName: '', currentPassword: '', newPassword: '' });
+  const [profileForm, setProfileForm] = useState({ fullName: '', currentPassword: '', newPassword: '', phone: '', age: '' });
   const [profileMsg, setProfileMsg] = useState<string | null>(null);
 
   // Fetch real data conditionally
@@ -303,7 +305,11 @@ export default function App() {
       localStorage.setItem('artisan_token', data.token);
       localStorage.setItem('artisan_user', JSON.stringify(data.user));
       setUser(data.user);
-      setView('home');
+      if (data.user.role === 'artisan') {
+        setView('artisan-dashboard');
+      } else {
+        setView('home');
+      }
     } catch (err: any) {
       setError(err.message);
     }
@@ -323,7 +329,13 @@ export default function App() {
       localStorage.setItem('artisan_token', data.token);
       localStorage.setItem('artisan_user', JSON.stringify(data.user));
       setUser(data.user);
-      setView('home');
+      if (data.user.role === 'artisan') {
+        setView('artisan-dashboard');
+      } else if (data.user.role === 'admin') {
+        setView('admin-dashboard');
+      } else {
+        setView('home');
+      }
     } catch (err: any) {
       setError(err.message);
     }
@@ -420,6 +432,11 @@ export default function App() {
 
   // ─── Handle Chat ───────────────────────────────────────────────────
   const openChat = async (target: { artisanProfileId: string, clientId: string, name: string }) => {
+    if (!user?.phone || !(user as any).age) {
+      alert("يرجى إكمال ملفك الشخصي (رقم الهاتف والعمر) لتتمكن من مراسلة الحرفيين.");
+      setView('client-profile');
+      return;
+    }
     setChatArtisan(target);
     setView('chat');
     try {
@@ -1133,6 +1150,31 @@ export default function App() {
           )}
 
           {view === 'artisan-dashboard' && (
+            artisanProfile?.verification_status !== 'approved' ? (
+              <motion.div
+                key="artisan-waiting"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="max-w-2xl mx-auto py-24 text-center space-y-8"
+              >
+                <div className="w-24 h-24 bg-emerald-100 rounded-full flex items-center justify-center mx-auto animate-pulse">
+                  <Clock className="w-12 h-12 text-emerald-600" />
+                </div>
+                <div className="space-y-4">
+                  <h2 className="text-4xl font-black tracking-tighter uppercase text-stone-900">مرحباً بك في تـوّا</h2>
+                  <p className="text-xl text-stone-500 font-medium">تم استلام طلبك بنجاح! نحن الآن في طور مراجعة بياناتك.</p>
+                  <div className="bg-white p-8 rounded-3xl border border-emerald-100 shadow-xl shadow-emerald-50/50 space-y-4 max-w-lg mx-auto">
+                    <p className="text-stone-900 font-bold">ماذا سيحدث الآن؟</p>
+                    <p className="text-sm text-stone-500 leading-relaxed">سيقوم أحد مسؤولي المنصة بالاتصال بك على رقم هاتفك <span className="text-emerald-600 font-black">({user?.phone})</span> خلال 24 ساعة للتحقق من هويتك وتوقيع عقد العمل.</p>
+                    <div className="pt-4 flex items-center justify-center gap-2 text-emerald-600 font-black text-xs uppercase tracking-widest">
+                      <ShieldCheck className="w-4 h-4" />
+                      يرجى إبقاء هاتفك متاحاً
+                    </div>
+                  </div>
+                  <button onClick={() => setView('home')} className="text-emerald-600 font-bold uppercase tracking-widest text-xs hover:underline pt-8">العودة للرئيسية</button>
+                </div>
+              </motion.div>
+            ) : (
             <motion.div
               key="artisan"
               initial={{ opacity: 0 }}
@@ -1642,6 +1684,29 @@ export default function App() {
                       onChange={(e) => setProfileForm({ ...profileForm, fullName: e.target.value })}
                       className="w-full p-4 bg-stone-50 border border-stone-200 rounded-2xl outline-none focus:border-emerald-500 text-right"
                     />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold uppercase tracking-widest text-stone-400">رقم الهاتف</label>
+                      <input
+                        type="text"
+                        placeholder="مثال: 000 000 21"
+                        value={profileForm.phone || user?.phone || ''}
+                        onChange={(e) => setProfileForm({ ...profileForm, phone: e.target.value })}
+                        className="w-full p-4 bg-stone-50 border border-stone-200 rounded-2xl outline-none focus:border-emerald-500 text-right"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold uppercase tracking-widest text-stone-400">العمر</label>
+                      <input
+                        type="number"
+                        placeholder="مثال: 25"
+                        value={profileForm.age || user?.age || ''}
+                        onChange={(e) => setProfileForm({ ...profileForm, age: e.target.value })}
+                        className="w-full p-4 bg-stone-50 border border-stone-200 rounded-2xl outline-none focus:border-emerald-500 text-right"
+                      />
+                    </div>
                   </div>
 
                   <div className="pt-4 border-t border-stone-50">
