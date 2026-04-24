@@ -398,6 +398,24 @@ export default function App() {
     setView('home');
   };
 
+  const toggleOnlineStatus = async () => {
+    const newStatus = artisanProfile?.is_online ? 0 : 1;
+    try {
+      await fetch(API_BASE + '/api/artisan/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('artisan_token')}`
+        },
+        body: JSON.stringify({ ...artisanProfile, is_online: newStatus })
+      });
+      setArtisanProfile((prev: any) => ({ ...prev, is_online: newStatus }));
+      addNotification(newStatus ? '🟢 أنت الآن متوفر للخدمة!' : '🔴 لقد قمت بإيقاف التشغيل مؤقتاً.');
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const getUserLocation = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((pos) => {
@@ -1309,6 +1327,34 @@ export default function App() {
               animate={{ opacity: 1 }}
               className="space-y-8"
             >
+              {/* Online/Offline Toggle */}
+              <div className="flex items-center justify-between bg-white p-5 rounded-2xl border border-stone-100 shadow-sm">
+                <div className="flex items-center gap-3">
+                  <div className={cn(
+                    "w-3 h-3 rounded-full transition-colors",
+                    artisanProfile?.is_online ? "bg-emerald-500 animate-pulse" : "bg-stone-300"
+                  )} />
+                  <div>
+                    <p className="font-bold text-stone-900 text-sm">
+                      {artisanProfile?.is_online ? 'أنت متوفر الآن للخدمة' : 'أنت غير متوفر حالياً'}
+                    </p>
+                    <p className="text-xs text-stone-400">{artisanProfile?.is_online ? 'يمكن للزبائن رؤيتك ومراسلتك' : 'لن تظهر في نتائج البحث'}</p>
+                  </div>
+                </div>
+                <button
+                  onClick={toggleOnlineStatus}
+                  className={cn(
+                    "relative w-14 h-7 rounded-full transition-all duration-300 focus:outline-none",
+                    artisanProfile?.is_online ? "bg-emerald-500" : "bg-stone-200"
+                  )}
+                >
+                  <span className={cn(
+                    "absolute top-1 w-5 h-5 bg-white rounded-full shadow-md transition-all duration-300",
+                    artisanProfile?.is_online ? "left-8" : "left-1"
+                  )} />
+                </button>
+              </div>
+
               <div className="grid md:grid-cols-4 gap-4">
                 {[
                   { label: "إجمالي الأرباح", val: "غير متوفر", icon: Zap, color: "bg-emerald-500" },
