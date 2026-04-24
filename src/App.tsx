@@ -76,7 +76,7 @@ export default function App() {
   const [location, setLocation] = useState<{ lat: number, lng: number } | null>(null);
   const [activeRadarId, setActiveRadarId] = useState<string | null>(null);
 
-  const [regData, setRegData] = useState({ fullName: '', email: '', password: '', phone: '', role: 'client' });
+  const [regData, setRegData] = useState({ fullName: '', email: '', password: '', phone: '', role: 'client' as 'client' | 'artisan', categoryId: '' });
   const [loginData, setLoginData] = useState({ email: '', password: '' });
   const [error, setError] = useState<string | null>(null);
 
@@ -1438,17 +1438,35 @@ export default function App() {
                     className="w-full p-3 bg-stone-50 border border-stone-200 rounded-xl focus:border-emerald-500 outline-none text-right"
                   />
                 </div>
-                <div className="space-y-1">
-                  <label className="text-xs font-bold uppercase tracking-widest text-stone-400">رقم الهاتف</label>
-                  <input
-                    type="tel"
-                    required
-                    placeholder="مثال: 000 000 21"
-                    value={regData.phone}
-                    onChange={(e) => setRegData({ ...regData, phone: e.target.value })}
-                    className="w-full p-3 bg-stone-50 border border-stone-200 rounded-xl focus:border-emerald-500 outline-none text-right"
-                  />
-                </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold uppercase tracking-widest text-stone-400">رقم الهاتف</label>
+                    <input
+                      type="tel"
+                      required
+                      placeholder="مثال: 000 000 21"
+                      value={regData.phone}
+                      onChange={(e) => setRegData({ ...regData, phone: e.target.value })}
+                      className="w-full p-3 bg-stone-50 border border-stone-200 rounded-xl focus:border-emerald-500 outline-none text-right"
+                    />
+                  </div>
+
+                  {regData.role === 'artisan' && (
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold uppercase tracking-widest text-stone-400">الفئة المهنية</label>
+                      <select
+                        required
+                        value={regData.categoryId}
+                        onChange={(e) => setRegData({ ...regData, categoryId: e.target.value })}
+                        className="w-full p-4 bg-stone-50 border border-stone-200 rounded-2xl outline-none focus:border-emerald-500 text-right appearance-none font-bold"
+                        dir="rtl"
+                      >
+                        <option value="">اختر التخصص...</option>
+                        {categories.map(c => (
+                          <option key={c.id} value={c.id}>{c.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
                 <div className="space-y-1">
                   <label className="text-xs font-bold uppercase tracking-widest text-stone-400">كلمة المرور</label>
                   <input
