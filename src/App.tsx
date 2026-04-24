@@ -1501,7 +1501,9 @@ export default function App() {
                               {req.status === 'pending' ? 'جديد' : req.status === 'accepted' ? 'مقبول' : 'مكتمل'}
                             </span>
                           </div>
-                          <p className="text-xs text-stone-500">العميل: {req.client_name} • {req.description}</p>
+                          <p className="text-xs text-stone-500">
+                            العميل: {req.client_name} {req.client_phone ? <span className="font-bold text-stone-700 mx-1" dir="ltr">{req.client_phone}</span> : ''} • {req.description}
+                          </p>
                         </div>
                         <div className="flex gap-2">
                           {req.status !== 'pending' && (
