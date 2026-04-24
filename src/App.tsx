@@ -668,19 +668,24 @@ export default function App() {
                         scheduled_at: bookingDate && bookingTime ? `${bookingDate}T${bookingTime}` : null
                       })
                     });
+                    const data = await res.json().catch(() => ({}));
                     if (res.ok) {
                       addNotification('تم إرسال طلبك بنجاح! يمكنك متابعته من لوحة التحكم.');
                       setBookingArtisan(null);
                       setBookingDesc('');
+                    } else {
+                      addNotification('خطأ: ' + (data.error || 'حدث خطأ غير متوقع'));
                     }
+                  } catch (err) {
+                    addNotification('حدث خطأ في الاتصال بالخادم');
                   } finally {
                     setLoading(false);
                   }
                 }}
-                disabled={!bookingDesc}
+                disabled={loading || !bookingDesc.trim()}
                 className="w-full bg-stone-900 text-white py-4 rounded-2xl font-black uppercase tracking-tighter hover:bg-stone-800 disabled:opacity-50 disabled:cursor-not-allowed border-b-4 border-black"
               >
-                تأكيد طلب الخدمة
+                {loading ? 'جاري الإرسال...' : (!bookingDesc.trim() ? 'الرجاء كتابة وصف للطلب' : 'تأكيد طلب الخدمة')}
               </button>
             </motion.div>
           </div>
