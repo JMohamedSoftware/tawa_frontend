@@ -61,7 +61,19 @@ interface User {
 // --- Main App ---
 
 export default function App() {
-  const [view, setView] = useState('home');
+  // Persist view in localStorage so refresh doesn't lose state
+  const [view, setViewRaw] = useState<string>(() => {
+    const savedView = localStorage.getItem('tawa_view') || 'home';
+    // Only restore dashboard views if user is still logged in
+    const savedUser = localStorage.getItem('artisan_user');
+    if (!savedUser && savedView !== 'home') return 'home';
+    return savedView;
+  });
+
+  const setView = (newView: string) => {
+    localStorage.setItem('tawa_view', newView);
+    setViewRaw(newView);
+  };
   const [selectedArtisan, setSelectedArtisan] = useState<Artisan | null>(null);
   const [selectedArtisanPhotos, setSelectedArtisanPhotos] = useState<any[]>([]);
   const [user, setUser] = useState<User | null>(null);
@@ -290,7 +302,25 @@ export default function App() {
   // Auth state + auto-load artisans on mount
   useEffect(() => {
     const saved = localStorage.getItem('artisan_user');
-    if (saved) setUser(JSON.parse(saved));
+    const token = localStorage.getItem('artisan_token');
+    const savedView = localStorage.getItem('tawa_view') || 'home';
+
+    if (saved && token) {
+      const parsedUser = JSON.parse(saved);
+      setUser(parsedUser);
+
+      // Restore correct view based on role
+      const protectedViews = ['artisan-dashboard', 'client-dashboard', 'admin-dashboard', 'client-profile', 'chat'];
+      if (protectedViews.includes(savedView)) {
+        // Keep the saved view — it's valid
+        setViewRaw(savedView);
+      }
+    } else {
+      // Not logged in, reset to home
+      setViewRaw('home');
+      localStorage.setItem('tawa_view', 'home');
+    }
+
     fetchCategories();
     // Auto-load nearby artisans
     handleSearch(undefined, false);
@@ -399,8 +429,9 @@ export default function App() {
   const handleLogout = () => {
     localStorage.removeItem('artisan_token');
     localStorage.removeItem('artisan_user');
+    localStorage.removeItem('tawa_view');
     setUser(null);
-    setView('home');
+    setViewRaw('home');
   };
 
   const toggleOnlineStatus = async () => {
