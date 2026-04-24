@@ -1392,7 +1392,7 @@ export default function App() {
                 </div>
               </div>
             </motion.div>
-          )}
+          ))}
 
           {view === 'register' && (
             <motion.div
